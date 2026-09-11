@@ -11,7 +11,7 @@
 <main><section id="listView"><h1>事業所を探す</h1><p class="lead">静岡市内の放課後等デイサービスを、特徴や学校名から探せます。</p><div class="search"><input id="q" placeholder="事業所名・学校名・住所で検索" oninput="render()"></div><div class="filters"><select id="type" onchange="render()"><option value="">すべての型</option></select><select id="ward" onchange="render()"><option value="">すべての区</option><option>葵区</option><option>駿河区</option><option>清水区</option></select></div><div id="cards"></div></section>
 <section id="detailView" class="detail"><button class="back" onclick="showList()">← 一覧に戻る</button><div id="detail"></div></section></main>
 <script>
-const DATA_URL="https://script.google.com/macros/s/AKfycbzpECji4-A3YzAxAbi6cpjofK-LIVd_7UmCwNX8sFY/dev"; // 本番: Apps Script WebアプリURL
+const DATA_URL="https://script.google.com/macros/s/AKfycbwsyQwUh-x3AjrucSMqHeRyQpNa9Rd8nNi60miO4NB_V9oqR2lYLrfH7e7B03MFiQ_h/exec"; // 本番: Apps Script WebアプリURL
 const fallback={types:[
 {type:"療育型",icon:"🧩",description:"日常生活や社会生活に必要な力を身につける支援を中心に行う事業所",display_order:1,active:true},
 {type:"運動型",icon:"🏃",description:"運動や身体活動を取り入れた支援を行う事業所",display_order:2,active:true},
