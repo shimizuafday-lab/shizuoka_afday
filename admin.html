@@ -1,0 +1,75 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>静岡市 放課後等デイサービスガイド｜管理</title><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;background:#f5f9fc;color:#243447}header{background:linear-gradient(135deg,#1677c8,#16a58b);color:#fff;padding:18px 16px}.wrap{max-width:1100px;margin:auto;padding:20px 16px}.panel{background:#fff;border-radius:18px;box-shadow:0 5px 22px #1b49651a;padding:18px;margin-bottom:16px}.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:#1677c8;color:#fff}.green{background:#16a58b;color:#fff}.muted{color:#667784;font-size:13px}.toolbar{display:flex;gap:10px;flex-wrap:wrap}.toolbar input,.toolbar select,.field input,.field textarea,.field select{padding:10px;border:1px solid #d5e1e8;border-radius:10px;width:100%}.provider{border:1px solid #dfe9ef;border-radius:14px;padding:14px;margin-top:10px}.provider h3{margin:0 0 7px}.status{display:inline-block;padding:5px 8px;border-radius:999px;font-size:12px;font-weight:800;background:#fff3cd}.status.open{background:#dff7ec;color:#147a58}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}.field label{display:block;font-weight:800;font-size:13px;margin-bottom:5px}.checks{display:flex;gap:7px;flex-wrap:wrap}.checks label{border:1px solid #d5e1e8;border-radius:999px;padding:8px 10px;font-size:12px}.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}@media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style></head><body><header><div class="wrap" style="padding:0 16px"><b>静岡市 放課後等デイサービスガイド</b>　管理画面</div></header><main class="wrap"><div class="panel"><h2 style="margin-top:0">Excelを取り込む</h2><p class="muted">GoogleスプレッドシートからダウンロードしたExcelを、そのまま選択してください。CSVへの変換は不要です。</p><input id="file" type="file" accept=".xlsx,.xls" onchange="importExcel(event)"><p id="msg" class="muted"></p></div><div class="panel"><div class="toolbar"><input id="q" placeholder="事業所名・住所・学校名で検索"><select id="pub"><option value="">公開状態：すべて</option><option>公開</option><option>非公開</option></select></div><div id="list"></div></div><div id="edit" class="panel" style="display:none"></div></main>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCLRfCIwnp6RoXg7SORwy32N_q_OzOGroQ",
+  authDomain: "shizuoka-afday.firebaseapp.com",
+  projectId: "shizuoka-afday",
+  storageBucket: "shizuoka-afday.firebasestorage.app",
+  messagingSenderId: "717009789129",
+  appId: "1:717009789129:web:b2c38c9fc726447254ed18"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore(), auth=firebase.auth();
+const TYPES=['総合型（生活能力向上）','総合型（重度）','学習型','運動型','就労準備型','重心医ケア'];
+let rows=[]; const $=x=>document.getElementById(x);
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function split(v){return String(v??'').split(/[,、\n]/).map(x=>x.trim()).filter(Boolean)}
+function formatTime(v){
+ if(v==null||v==='')return '';
+ if(v instanceof Date)return String(v.getHours()).padStart(2,'0')+':'+String(v.getMinutes()).padStart(2,'0');
+ if(typeof v==='number'){let t=Math.round((v-Math.floor(v))*1440);let h=Math.floor(t/60)%24,m=t%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')}
+ let s=String(v).trim(),m=s.match(/(\d{1,2}):(\d{2})(?::\d{2})?/);return m?String(m[1]).padStart(2,'0')+':'+m[2]:s;
+}
+function time(a,b){a=formatTime(a);b=formatTime(b);return a&&b?`${a}〜${b}`:a||b||''}
+function get(r,...ns){for(const n of ns)if(r[n]!==''&&r[n]!=null)return r[n];return ''}
+function normalize(r,i){return {id:get(r,'事業所ID')||'SVD-'+String(i+1).padStart(3,'0'),name:get(r,'事業所名'),types:split(get(r,'事業所の型')),ward:get(r,'静岡市区'),address:get(r,'事業所住所'),phone:get(r,'電話番号'),hp:get(r,'ホームページURL'),weekday:time(get(r,'平日の営業開始時間'),get(r,'平日の営業終了時間')),holiday:time(get(r,'休日・長期休暇の営業開始時間'),get(r,'休日・長期休暇の営業終了時間')),openDays:split(get(r,'営業日')).join('・'),closedDays:split(get(r,'閉所日')).join('・'),transport:get(r,'送迎サービス'),food:get(r,'食事提供'),schools:split(get(r,'主な通学先')),appeal:get(r,'事業所の説明（アピールポイント）'),photo1:get(r,'事業所写真①'),photo2:get(r,'事業所写真②'),photo3:get(r,'事業所写真③'),published:get(r,'公開')||'非公開'}}
+
+function importExcel(e){
+ const f=e.target.files[0];if(!f)return;$('msg').textContent='読み込み中…';
+ const rd=new FileReader();rd.onload=x=>{try{
+  const wb=XLSX.read(x.target.result,{type:'array',cellDates:true});
+  const sn=wb.SheetNames.find(n=>n==='フォームの回答 1')||wb.SheetNames[0];
+  rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{defval:'',raw:true}).map(normalize).filter(r=>r.name);
+  $('msg').textContent=`${rows.length}件を読み込みました。公開/保存はログイン後に実行できます。`;render();
+ }catch(err){$('msg').textContent='読み込みに失敗しました：'+err.message}}
+ rd.readAsArrayBuffer(f)
+}
+function render(){
+ const s=$('q').value.trim().toLowerCase(),p=$('pub').value;
+ const a=rows.filter(r=>(!s||[r.name,r.address,r.ward,...r.schools].join(' ').toLowerCase().includes(s))&&(!p||r.published===p));
+ $('list').innerHTML=a.length?a.map(r=>`<div class="provider"><div style="display:flex;justify-content:space-between;gap:10px"><div><h3>${esc(r.name)}</h3><div class="muted">${esc(r.id)}　${esc(r.ward)}　${esc(r.address)}</div><div style="margin-top:7px">${r.types.map(t=>`<span class="status">${esc(t)}</span>`).join(' ')}</div><div class="muted" style="margin-top:8px">平日 ${esc(r.weekday)}　｜　休日・長期休暇 ${esc(r.holiday)}<br>営業日 ${esc(r.openDays)}　｜　閉所日 ${esc(r.closedDays)}</div></div><div><span class="status ${r.published==='公開'?'open':''}">${esc(r.published)}</span><button class="btn" onclick="edit('${esc(r.id)}')">編集</button></div></div></div>`).join(''):'<p class="muted">該当する事業所はありません。</p>';
+}
+function edit(id){
+ const r=rows.find(x=>x.id===id);if(!r)return;$('edit').style.display='block';
+ $('edit').innerHTML=`<h2 style="margin-top:0">事業所を編集</h2><div class="grid">
+ <div class="field"><label>事業所名</label><input id="e_name" value="${esc(r.name)}"></div><div class="field"><label>静岡市区</label><input id="e_ward" value="${esc(r.ward)}"></div>
+ <div class="field full"><label>事業所住所</label><input id="e_address" value="${esc(r.address)}"></div><div class="field"><label>電話番号</label><input id="e_phone" value="${esc(r.phone)}"></div><div class="field"><label>ホームページURL</label><input id="e_hp" value="${esc(r.hp)}"></div>
+ <div class="field"><label>平日の営業時間</label><input id="e_weekday" value="${esc(r.weekday)}"></div><div class="field"><label>休日・長期休暇の営業時間</label><input id="e_holiday" value="${esc(r.holiday)}"></div>
+ <div class="field"><label>営業日</label><input id="e_open" value="${esc(r.openDays)}"></div><div class="field"><label>閉所日</label><input id="e_closed" value="${esc(r.closedDays)}"></div>
+ <div class="field"><label>送迎サービス</label><input id="e_transport" value="${esc(r.transport)}"></div><div class="field"><label>食事提供</label><input id="e_food" value="${esc(r.food)}"></div>
+ <div class="field full"><label>主な通学先</label><textarea id="e_schools" rows="4">${esc(r.schools.join('\\n'))}</textarea></div><div class="field full"><label>事業所の説明（アピールポイント）</label><textarea id="e_appeal" rows="5">${esc(r.appeal)}</textarea></div>
+ <div class="field"><label>公開</label><select id="e_pub"><option>非公開</option><option ${r.published==='公開'?'selected':''}>公開</option></select></div></div>
+ <div class="actions"><button class="btn" onclick="$('edit').style.display='none'">閉じる</button><button class="btn green" onclick="save('${esc(r.id)}')">Firestoreに保存</button></div>`;
+ $('edit').scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function save(id){
+ const r=rows.find(x=>x.id===id);if(!r)return;
+ Object.assign(r,{name:$('e_name').value.trim(),ward:$('e_ward').value.trim(),address:$('e_address').value.trim(),phone:$('e_phone').value.trim(),hp:$('e_hp').value.trim(),weekday:$('e_weekday').value.trim(),holiday:$('e_holiday').value.trim(),openDays:$('e_open').value.trim(),closedDays:$('e_closed').value.trim(),transport:$('e_transport').value.trim(),food:$('e_food').value.trim(),schools:split($('e_schools').value),appeal:$('e_appeal').value.trim(),published:$('e_pub').value});
+ if(!auth.currentUser){alert('先に管理者ログインをしてください。');return}
+ try{await db.collection('providers').doc(r.id).set(r);$('edit').style.display='none';render();alert('Firestoreに保存しました。')}catch(e){alert('保存に失敗しました：'+e.message)}
+}
+async function loadFirestore(){
+ if(!auth.currentUser)return;
+ const snap=await db.collection('providers').get();
+ rows=snap.docs.map(d=>({id:d.id,...d.data()}));render();$('msg').textContent=`Firestoreから${rows.length}件読み込みました。`;
+}
+function showLogin(){if($('login'))return;const p=document.createElement('div');p.id='login';p.className='panel';p.innerHTML=`<h2 style="margin-top:0">管理者ログイン</h2><div class="grid"><div class="field"><label>メールアドレス</label><input id="loginEmail" type="email"></div><div class="field"><label>パスワード</label><input id="loginPass" type="password"></div></div><div class="actions"><button class="btn primary" onclick="login()">ログイン</button></div><p id="loginMsg" class="muted"></p>`;document.querySelector('main').prepend(p)}
+async function login(){try{await auth.signInWithEmailAndPassword($('loginEmail').value,$('loginPass').value)}catch(e){$('loginMsg').textContent='ログインできません：'+e.message}}
+auth.onAuthStateChanged(u=>{if(u){if($('login'))$('login').remove();loadFirestore()}else showLogin()});
+$('q').oninput=render;$('pub').onchange=render;render();
+</script></body></html>
