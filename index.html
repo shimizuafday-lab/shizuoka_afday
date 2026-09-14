@@ -15,6 +15,319 @@
 .grid .info:nth-child(4){font-weight:700}
 
 .typeExplain p{margin:8px 0;padding:8px 10px;background:#f7fafc;border-radius:10px;font-size:13px;line-height:1.55}
+
+/* ===== MENU UI v34 — built from the actual current index(2).html ===== */
+#menu{display:none !important}
+
+.menuModal{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  align-items:flex-start;
+  justify-content:center;
+  padding:54px 10px 12px;
+  background:rgba(20,48,68,.48);
+  backdrop-filter:blur(4px);
+}
+.menuModal.open{display:flex}
+
+.menuModalBox{
+  width:min(680px,100%);
+  max-height:calc(100vh - 66px);
+  overflow:hidden;
+  background:#f4fafc;
+  border-radius:22px;
+  box-shadow:0 20px 55px rgba(0,0,0,.28);
+}
+.menuModalHeader{
+  position:relative;
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+  border-bottom:1px solid #e5edf1;
+}
+.menuModalTitle{
+  color:#1677c8;
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.menuModalClose{
+  position:absolute;
+  top:10px;
+  right:12px;
+  width:42px;
+  height:42px;
+  border:0;
+  border-radius:12px;
+  background:#edf7ff;
+  color:#1677c8;
+  font-size:27px;
+  font-weight:900;
+  line-height:1;
+}
+.menuModalContent{
+  max-height:calc(100vh - 130px);
+  overflow:auto;
+}
+.menuPopup{
+  display:block !important;
+  margin:0 !important;
+  padding:14px 15px 18px !important;
+  background:#f4fafc !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+}
+.menuPopup details{
+  margin:0 0 11px !important;
+  padding:0 !important;
+  border:0 !important;
+}
+.menuPopup details:last-child{margin-bottom:0 !important}
+
+/* remove native triangle */
+.menuPopup summary{
+  position:relative !important;
+  min-height:60px !important;
+  display:flex !important;
+  align-items:center !important;
+  padding:12px 48px 12px 70px !important;
+  background:#fff !important;
+  color:#263d49 !important;
+  border:1px solid #e0ebf0 !important;
+  border-radius:13px !important;
+  font-size:16px !important;
+  font-weight:900 !important;
+  line-height:1.4 !important;
+  list-style:none !important;
+  cursor:pointer !important;
+  box-shadow:0 4px 12px rgba(30,75,95,.10) !important;
+}
+.menuPopup summary::-webkit-details-marker{display:none !important}
+.menuPopup summary::marker{content:"" !important;display:none !important;font-size:0 !important}
+
+/* colorful ribbon */
+.menuPopup summary:before{
+  content:"" !important;
+  position:absolute !important;
+  left:0 !important;
+  top:0 !important;
+  width:51px !important;
+  height:100% !important;
+  background:#f4b52c !important;
+  border-radius:12px 0 24px 0 !important;
+}
+.menuPopup details:nth-child(2) summary:before{background:#ef5b8b !important}
+.menuPopup details:nth-child(3) summary:before{background:#46ad69 !important}
+.menuPopup details:nth-child(4) summary:before{background:#3197d3 !important}
+.menuPopup details:nth-child(5) summary:before{background:#9864cc !important}
+
+/* small plus/minus — no circle */
+.menuPopup summary:after{
+  content:"＋" !important;
+  position:absolute !important;
+  right:15px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+  color:#647680 !important;
+  font-size:20px !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+}
+.menuPopup details[open] summary:after{
+  content:"−" !important;
+  color:#fff !important;
+}
+
+/* open header */
+.menuPopup details[open] summary{
+  color:#fff !important;
+  border-color:transparent !important;
+}
+.menuPopup details[open]:nth-child(1) summary{background:#f4b52c !important}
+.menuPopup details[open]:nth-child(2) summary{background:#ef5b8b !important}
+.menuPopup details[open]:nth-child(3) summary{background:#46ad69 !important}
+.menuPopup details[open]:nth-child(4) summary{background:#3197d3 !important}
+.menuPopup details[open]:nth-child(5) summary{background:#9864cc !important}
+
+/* explanation separated from heading */
+.menuPopup details > p,
+.menuPopup details > #typeHelp{
+  margin:7px 8px 0 52px !important;
+  padding:14px 16px !important;
+  background:#fff !important;
+  color:#657781 !important;
+  border:1px solid #e2edf1 !important;
+  border-radius:11px !important;
+  box-shadow:0 2px 8px rgba(30,75,95,.06) !important;
+}
+.menuPopup details > p{
+  font-size:13px !important;
+  font-weight:500 !important;
+  line-height:1.8 !important;
+}
+.menuPopup #typeHelp p{
+  margin:7px 0 !important;
+  padding:9px 11px !important;
+  background:#f7fafc !important;
+  border-radius:8px !important;
+  color:#657781 !important;
+  font-size:13px !important;
+  line-height:1.65 !important;
+}
+.menuPopup #typeHelp p b{color:#344752 !important}
+
+@media(max-width:700px){
+  .menuModal{padding:38px 7px 8px}
+  .menuModalBox{
+    width:calc(100vw - 14px);
+    max-height:calc(100vh - 46px);
+    border-radius:18px;
+  }
+  .menuModalHeader{
+    height:56px;
+    border-radius:18px 18px 0 0;
+  }
+  .menuModalTitle{font-size:18px}
+  .menuModalClose{
+    top:8px;right:8px;width:39px;height:39px;
+    border-radius:11px;font-size:24px;
+  }
+  .menuModalContent{max-height:calc(100vh - 102px)}
+  .menuPopup{padding:10px 9px 14px !important}
+  .menuPopup details{margin-bottom:9px !important}
+  .menuPopup summary{
+    min-height:55px !important;
+    padding:10px 41px 10px 66px !important;
+    font-size:15px !important;
+  }
+  .menuPopup summary:before{width:49px !important}
+  .menuPopup summary:after{right:12px !important;font-size:19px !important}
+  .menuPopup details > p,
+  .menuPopup details > #typeHelp{
+    margin:6px 4px 0 50px !important;
+    padding:12px 13px !important;
+  }
+}
+
+
+/* ===== COMPACT MENU v35 ===== */
+.menuModal{
+  padding:42px 10px 10px !important;
+}
+.menuModalBox{
+  width:min(590px,100%) !important;
+  max-height:calc(100vh - 52px) !important;
+  border-radius:18px !important;
+}
+.menuModalHeader{
+  height:56px !important;
+}
+.menuModalTitle{
+  font-size:18px !important;
+}
+.menuModalClose{
+  top:8px !important;
+  right:9px !important;
+  width:37px !important;
+  height:37px !important;
+  border-radius:11px !important;
+  font-size:23px !important;
+}
+.menuModalContent{
+  max-height:calc(100vh - 108px) !important;
+}
+.menuPopup{
+  padding:11px 12px 14px !important;
+}
+.menuPopup details{
+  margin-bottom:9px !important;
+}
+.menuPopup summary{
+  min-height:52px !important;
+  padding:9px 42px 9px 60px !important;
+  font-size:15px !important;
+  border-radius:11px !important;
+  box-shadow:0 3px 9px rgba(30,75,95,.08) !important;
+}
+.menuPopup summary:before{
+  width:43px !important;
+  border-radius:10px 0 20px 0 !important;
+}
+.menuPopup summary:after{
+  right:13px !important;
+  font-size:18px !important;
+}
+.menuPopup details > p,
+.menuPopup details > #typeHelp{
+  margin:6px 6px 0 44px !important;
+  padding:11px 13px !important;
+  border-radius:9px !important;
+}
+.menuPopup details > p{
+  font-size:12px !important;
+  line-height:1.7 !important;
+}
+.menuPopup #typeHelp p{
+  margin:5px 0 !important;
+  padding:8px 10px !important;
+  font-size:12px !important;
+  line-height:1.55 !important;
+}
+@media(max-width:700px){
+  .menuModal{
+    padding:30px 6px 7px !important;
+  }
+  .menuModalBox{
+    width:calc(100vw - 12px) !important;
+    max-height:calc(100vh - 37px) !important;
+    border-radius:16px !important;
+  }
+  .menuModalHeader{
+    height:50px !important;
+  }
+  .menuModalTitle{
+    font-size:17px !important;
+  }
+  .menuModalClose{
+    top:6px !important;
+    right:7px !important;
+    width:35px !important;
+    height:35px !important;
+    border-radius:10px !important;
+    font-size:22px !important;
+  }
+  .menuModalContent{
+    max-height:calc(100vh - 87px) !important;
+  }
+  .menuPopup{
+    padding:9px 8px 12px !important;
+  }
+  .menuPopup details{
+    margin-bottom:8px !important;
+  }
+  .menuPopup summary{
+    min-height:48px !important;
+    padding:8px 36px 8px 54px !important;
+    font-size:14px !important;
+  }
+  .menuPopup summary:before{
+    width:39px !important;
+  }
+  .menuPopup summary:after{
+    right:10px !important;
+    font-size:17px !important;
+  }
+  .menuPopup details > p,
+  .menuPopup details > #typeHelp{
+    margin:5px 4px 0 40px !important;
+    padding:10px 11px !important;
+  }
+}
+
 </style></head><body><header><div class="head"><div><h1>静岡市 放課後等デイサービスガイド</h1><div class="sub">保護者の方が事業所を探すための情報サイト</div></div><button class="menuBtn" onclick="openMenu()">☰</button></div></header><main><div id="menu" class="menu"><details><summary>利用方法</summary><p>気になる事業所の情報をご確認いただき、見学・体験や現在の対応状況について各事業所へ直接お問い合わせください。</p></details><details><summary>事業所の支援タイプについて</summary><div id="typeHelp">
 <p><b>🧩 総合型（生活能力向上）</b><br>日常生活や社会生活に必要な力を身につける支援を中心に行う事業所です。</p>
 <p><b>💡 総合型（重度）</b><br>重度の障害特性等に配慮した支援を中心に行う事業所です。</p>
@@ -22,7 +335,14 @@
 <p><b>🏃 運動型</b><br>運動や身体活動を取り入れた支援を行う事業所です。</p>
 <p><b>🎨 就労準備型</b><br>就労を見据えた作業活動や支援を行う事業所です。</p>
 <p><b>♿ 重心医療ケア型</b><br>重症心身障害児や医療的ケアが必要な児童の支援を行う事業所です。</p>
-</div></details><details><summary>掲載情報に関するお願い</summary><p>本ガイドに掲載されている情報は、調査・登録時点のものです。空き状況や事業所の体制などは日々変化いたします。「今見ている情報が常に最新の状態」とは限りません。もし掲載内容で少しでも気になる点がございましたら、遠慮なく各事業所へ直接お電話やウェブサイトからご連絡いただくことをお勧めします。</p></details><details><summary>掲載写真について</summary><p>各事業所のページに使用されている写真は、施設の雰囲気をお伝えするための「イメージ」です。実際の活動内容は、お子さまの特性や年齢等によって異なる場合があります。具体的な活動内容や最新の設備については、見学や体験の際にご確認ください。</p></details><details><summary>学校の表示・送迎範囲について</summary><p>「主な通学先」として表示されている学校名や実績は、その年（年度）の契約状況や送迎ルートによって随時変更されます。昨年まで実績があった学校でも、現在の定員やスタッフ配置によって対応が難しい場合、または新たに広域へ対応している場合がございます。現在の正確な対応状況については、必ず事前にお問い合わせください。</p></details></div><section id="listView"><div class="search"><input id="q" placeholder="事業所名・学校名・住所で検索"><div class="filters"><select id="type"><option value="">すべての支援タイプ</option>
+</div></details><details><summary>掲載情報に関するお願い</summary><p>本ガイドに掲載されている情報は、調査・登録時点のものです。空き状況や事業所の体制などは日々変化いたします。「今見ている情報が常に最新の状態」とは限りません。もし掲載内容で少しでも気になる点がございましたら、遠慮なく各事業所へ直接お電話やウェブサイトからご連絡いただくことをお勧めします。</p></details><details><summary>掲載写真について</summary><p>各事業所のページに使用されている写真は、施設の雰囲気をお伝えするための「イメージ」です。実際の活動内容は、お子さまの特性や年齢等によって異なる場合があります。具体的な活動内容や最新の設備については、見学や体験の際にご確認ください。</p></details><details><summary>学校の表示・送迎範囲について</summary><p>「主な通学先」として表示されている学校名や実績は、その年（年度）の契約状況や送迎ルートによって随時変更されます。昨年まで実績があった学校でも、現在の定員やスタッフ配置によって対応が難しい場合、または新たに広域へ対応している場合がございます。現在の正確な対応状況については、必ず事前にお問い合わせください。</p></details></div><div id="menuModal" class="menuModal" onclick="if(event.target===this)closeMenu()"><div class="menuModalBox"><div class="menuModalHeader"><div class="menuModalTitle">☰ メニュー</div><button class="menuModalClose" onclick="closeMenu()" aria-label="メニューを閉じる">×</button></div><div class="menuModalContent"><div class="menu menuPopup"><details><summary>利用方法</summary><p>気になる事業所の情報をご確認いただき、見学・体験や現在の対応状況について各事業所へ直接お問い合わせください。</p></details><details><summary>事業所の支援タイプについて</summary><div id="typeHelp">
+<p><b>🧩 総合型（生活能力向上）</b><br>日常生活や社会生活に必要な力を身につける支援を中心に行う事業所です。</p>
+<p><b>💡 総合型（重度）</b><br>重度の障害特性等に配慮した支援を中心に行う事業所です。</p>
+<p><b>📚 学習型</b><br>学習習慣や読み書き、数など、学習面の支援を重視する事業所です。</p>
+<p><b>🏃 運動型</b><br>運動や身体活動を取り入れた支援を行う事業所です。</p>
+<p><b>🎨 就労準備型</b><br>就労を見据えた作業活動や支援を行う事業所です。</p>
+<p><b>♿ 重心医療ケア型</b><br>重症心身障害児や医療的ケアが必要な児童の支援を行う事業所です。</p>
+</div></details><details><summary>掲載情報に関するお願い</summary><p>本ガイドに掲載されている情報は、調査・登録時点のものです。空き状況や事業所の体制などは日々変化いたします。「今見ている情報が常に最新の状態」とは限りません。もし掲載内容で少しでも気になる点がございましたら、遠慮なく各事業所へ直接お電話やウェブサイトからご連絡いただくことをお勧めします。</p></details><details><summary>掲載写真について</summary><p>各事業所のページに使用されている写真は、施設の雰囲気をお伝えするための「イメージ」です。実際の活動内容は、お子さまの特性や年齢等によって異なる場合があります。具体的な活動内容や最新の設備については、見学や体験の際にご確認ください。</p></details><details><summary>学校の表示・送迎範囲について</summary><p>「主な通学先」として表示されている学校名や実績は、その年（年度）の契約状況や送迎ルートによって随時変更されます。昨年まで実績があった学校でも、現在の定員やスタッフ配置によって対応が難しい場合、または新たに広域へ対応している場合がございます。現在の正確な対応状況については、必ず事前にお問い合わせください。</p></details></div></div></div></div><section id="listView"><div class="search"><input id="q" placeholder="事業所名・学校名・住所で検索"><div class="filters"><select id="type"><option value="">すべての支援タイプ</option>
 <option>総合型（生活能力向上）</option><option>総合型（重度）</option><option>学習型</option><option>運動型</option><option>就労準備型</option><option value="重心医ケア">重心医療ケア型</option></select><select id="ward"><option value="">すべての区別</option><option>葵区</option><option>駿河区</option><option>清水区</option></select></div></div><div id="cards" class="cards"></div></section><section id="detailView" class="detail"></section></main><div id="menuModal" class="menuModal" onclick="if(event.target===this)closeMenu()"><div class="menuModalBox"><button class="menuModalClose" onclick="closeMenu()" aria-label="メニューを閉じる">×</button><h2 class="menuModalTitle">☰ メニュー</h2><div id="menuModalContent"></div></div></div><div id="galleryModal" class="galleryModal" onclick="if(event.target===this)closeGallery()"><button class="galleryModalClose" onclick="closeGallery()" aria-label="写真を閉じる">×</button><img id="galleryModalImg" alt="事業所写真"><div id="galleryModalCount" class="galleryModalCount"></div></div>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
