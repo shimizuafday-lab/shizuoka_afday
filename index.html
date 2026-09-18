@@ -110,6 +110,7 @@
 .menuPopup summary::marker{content:"" !important;display:none !important;font-size:0 !important}
 
 /* colorful ribbon */
+.menuPopup summary{overflow:hidden !important}
 .menuPopup summary:before{
   content:"" !important;
   position:absolute !important;
@@ -164,7 +165,7 @@
   border-radius:11px !important;
   box-shadow:0 2px 8px rgba(30,75,95,.06) !important;
 }
-.menuPopup details > p{
+.menuGuideImages{margin-top:10px;display:flex;flex-direction:column;gap:10px}.menuGuideImages img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid #e1e9ed;cursor:zoom-in;background:#fff}.menuGuideNote{font-size:11px;color:#71808c;text-align:center;margin-top:-2px}.menuGuideImages img:hover{opacity:.97}@media(max-width:700px){.menuGuideImages{gap:8px}.menuGuideImages img{border-radius:8px}.menuGuideNote{font-size:10px}}.menuPopup details > p{
   font-size:13px !important;
   font-weight:500 !important;
   line-height:1.8 !important;
@@ -328,14 +329,14 @@
   }
 }
 
-</style></head><body><header><div class="head"><div><h1>静岡市 放課後等デイサービスガイド</h1><div class="sub">保護者の方が事業所を探すための情報サイト</div></div><button class="menuBtn" onclick="openMenu()">☰</button></div></header><main><div id="menu" class="menu"><details><summary>利用方法</summary><p>気になる事業所の情報をご確認いただき、見学・体験や現在の対応状況について各事業所へ直接お問い合わせください。</p></details><details><summary>事業所の支援タイプについて</summary><div id="typeHelp">
+</style></head><body><header><div class="head"><div><h1>静岡市 放課後等デイサービスガイド</h1><div class="sub">保護者の方が事業所を探すための情報サイト</div></div><button class="menuBtn" onclick="openMenu()">☰</button></div></header><main><div id="menu" class="menu"><details><summary>利用方法</summary><p>気になる事業所の情報をご確認いただき、見学・体験や現在の対応状況について各事業所へ直接お問い合わせください。</p><div class="menuGuideImages"><img src="assets/guide_flow.jpg" alt="放デイに通うためのリスト" onclick="openGuideImage(this.src)"><img src="assets/guide_about.jpg" alt="放課後等デイサービスってなに？" onclick="openGuideImage(this.src)"><div class="menuGuideNote">※画像をタップすると拡大してご覧いただけます。</div></div></details><details><summary>事業所の支援タイプについて</summary><div id="typeHelp">
 <p><b>🧩 総合型（生活能力向上）</b><br>日常生活や社会生活に必要な力を身につける支援を中心に行う事業所です。</p>
 <p><b>💡 総合型（重度）</b><br>重度の障害特性等に配慮した支援を中心に行う事業所です。</p>
 <p><b>📚 学習型</b><br>学習習慣や読み書き、数など、学習面の支援を重視する事業所です。</p>
 <p><b>🏃 運動型</b><br>運動や身体活動を取り入れた支援を行う事業所です。</p>
 <p><b>🎨 就労準備型</b><br>就労を見据えた作業活動や支援を行う事業所です。</p>
 <p><b>♿ 重心医療ケア型</b><br>重症心身障害児や医療的ケアが必要な児童の支援を行う事業所です。</p>
-</div></details><details><summary>掲載情報に関するお願い</summary><p>本ガイドに掲載されている情報は、調査・登録時点のものです。空き状況や事業所の体制などは日々変化いたします。「今見ている情報が常に最新の状態」とは限りません。もし掲載内容で少しでも気になる点がございましたら、遠慮なく各事業所へ直接お電話やウェブサイトからご連絡いただくことをお勧めします。</p></details><details><summary>掲載写真について</summary><p>各事業所のページに使用されている写真は、施設の雰囲気をお伝えするための「イメージ」です。実際の活動内容は、お子さまの特性や年齢等によって異なる場合があります。具体的な活動内容や最新の設備については、見学や体験の際にご確認ください。</p></details><details><summary>学校の表示・送迎範囲について</summary><p>「主な通学先」として表示されている学校名や実績は、その年（年度）の契約状況や送迎ルートによって随時変更されます。昨年まで実績があった学校でも、現在の定員やスタッフ配置によって対応が難しい場合、または新たに広域へ対応している場合がございます。現在の正確な対応状況については、必ず事前にお問い合わせください。</p></details></div><div id="menuModal" class="menuModal" onclick="if(event.target===this)closeMenu()"><div class="menuModalBox"><div class="menuModalHeader"><div class="menuModalTitle">☰ メニュー</div><button class="menuModalClose" onclick="closeMenu()" aria-label="メニューを閉じる">×</button></div><div class="menuModalContent"><div class="menu menuPopup"><details><summary>利用方法</summary><p>気になる事業所の情報をご確認いただき、見学・体験や現在の対応状況について各事業所へ直接お問い合わせください。</p></details><details><summary>事業所の支援タイプについて</summary><div id="typeHelp">
+</div></details><details><summary>掲載情報に関するお願い</summary><p>本ガイドに掲載されている情報は、調査・登録時点のものです。空き状況や事業所の体制などは日々変化いたします。「今見ている情報が常に最新の状態」とは限りません。もし掲載内容で少しでも気になる点がございましたら、遠慮なく各事業所へ直接お電話やウェブサイトからご連絡いただくことをお勧めします。</p></details><details><summary>掲載写真について</summary><p>各事業所のページに使用されている写真は、施設の雰囲気をお伝えするための「イメージ」です。実際の活動内容は、お子さまの特性や年齢等によって異なる場合があります。具体的な活動内容や最新の設備については、見学や体験の際にご確認ください。</p></details><details><summary>学校の表示・送迎範囲について</summary><p>「主な通学先」として表示されている学校名や実績は、その年（年度）の契約状況や送迎ルートによって随時変更されます。昨年まで実績があった学校でも、現在の定員やスタッフ配置によって対応が難しい場合、または新たに広域へ対応している場合がございます。現在の正確な対応状況については、必ず事前にお問い合わせください。</p></details></div><div id="menuModal" class="menuModal" onclick="if(event.target===this)closeMenu()"><div class="menuModalBox"><div class="menuModalHeader"><div class="menuModalTitle">☰ メニュー</div><button class="menuModalClose" onclick="closeMenu()" aria-label="メニューを閉じる">×</button></div><div class="menuModalContent"><div class="menu menuPopup"><details><summary>利用方法</summary><p>気になる事業所の情報をご確認いただき、見学・体験や現在の対応状況について各事業所へ直接お問い合わせください。</p><div class="menuGuideImages"><img src="assets/guide_flow.jpg" alt="放デイに通うためのリスト" onclick="openGuideImage(this.src)"><img src="assets/guide_about.jpg" alt="放課後等デイサービスってなに？" onclick="openGuideImage(this.src)"><div class="menuGuideNote">※画像をタップすると拡大してご覧いただけます。</div></div></details><details><summary>事業所の支援タイプについて</summary><div id="typeHelp">
 <p><b>🧩 総合型（生活能力向上）</b><br>日常生活や社会生活に必要な力を身につける支援を中心に行う事業所です。</p>
 <p><b>💡 総合型（重度）</b><br>重度の障害特性等に配慮した支援を中心に行う事業所です。</p>
 <p><b>📚 学習型</b><br>学習習慣や読み書き、数など、学習面の支援を重視する事業所です。</p>
@@ -385,8 +386,9 @@ let galleryPhotos=[];let galleryIndex=0;
 function setGalleryPhotos(photos){galleryPhotos=photos||[];galleryIndex=0}
 function setPhoto(i){if(!galleryPhotos.length)return;galleryIndex=(i+galleryPhotos.length)%galleryPhotos.length;const img=$('detailGalleryImg');if(img)img.src=galleryPhotos[galleryIndex];const count=$('photoCount');if(count)count.textContent=`${galleryIndex+1} / ${galleryPhotos.length}`;document.querySelectorAll('.galleryDot').forEach((d,n)=>d.classList.toggle('active',n===galleryIndex))}
 function changePhoto(delta){setPhoto(galleryIndex+delta)}
-function openGallery(){if(!galleryPhotos.length)return;const m=$('galleryModal');$('galleryModalImg').src=galleryPhotos[galleryIndex];$('galleryModalCount').textContent=`${galleryIndex+1} / ${galleryPhotos.length}`;m.classList.add('open');document.body.style.overflow='hidden'}
+function openGallery(){if(!galleryPhotos.length)return;const m=$('galleryModal');$('galleryModalImg').src=galleryPhotos[galleryIndex];$('galleryModalCount').textContent=`${galleryIndex+1} / ${galleryPhotos.length}`;$('galleryModalCount').style.display='block';m.classList.add('open');document.body.style.overflow='hidden'}
 function closeGallery(){$('galleryModal').classList.remove('open');document.body.style.overflow=''}
+function openGuideImage(src){const m=$('galleryModal');$('galleryModalImg').src=src;$('galleryModalCount').textContent='';$('galleryModalCount').style.display='none';m.classList.add('open');document.body.style.overflow='hidden'}
 function openMenu(){const content=$('menuModalContent');content.innerHTML=$('menu').innerHTML;$('menuModal').classList.add('open');document.body.style.overflow='hidden'}
 function closeMenu(){$('menuModal').classList.remove('open');document.body.style.overflow=''}
 function back(){$('detailView').style.display='none';$('listView').style.display='block';window.scrollTo({top:0,behavior:'smooth'});closeGallery()}
