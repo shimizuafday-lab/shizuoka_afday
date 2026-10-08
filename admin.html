@@ -1,6 +1,6 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>静岡市 放課後等デイサービスガイド｜管理</title><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;background:#f5f9fc;color:#243447}header{background:linear-gradient(135deg,#1677c8,#16a58b);color:#fff;padding:18px 16px}.wrap{max-width:1100px;margin:auto;padding:20px 16px}.panel{background:#fff;border-radius:18px;box-shadow:0 5px 22px #1b49651a;padding:18px;margin-bottom:16px}.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:#1677c8;color:#fff}.green{background:#16a58b;color:#fff}.muted{color:#667784;font-size:13px}.toolbar{display:flex;gap:10px;flex-wrap:wrap}.toolbar input,.toolbar select,.field input,.field textarea,.field select{padding:10px;border:1px solid #d5e1e8;border-radius:10px;width:100%}.provider{border:1px solid #dfe9ef;border-radius:14px;padding:14px;margin-top:10px}.provider h3{margin:0 0 7px}.status{display:inline-block;padding:5px 8px;border-radius:999px;font-size:12px;font-weight:800;background:#fff3cd}.status.open{background:#dff7ec;color:#147a58}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}.field label{display:block;font-weight:800;font-size:13px;margin-bottom:5px}.checks{display:flex;gap:7px;flex-wrap:wrap}.checks label{border:1px solid #d5e1e8;border-radius:999px;padding:8px 10px;font-size:12px}.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}.photoPreview{margin-top:8px;min-height:72px;border:1px dashed #d5e1e8;border-radius:10px;background:#f8fbfd;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px;color:#667784;font-size:12px}.photoPreview img{display:block;max-width:100%;max-height:180px;border-radius:8px;object-fit:contain}@media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
-</style></head><body><header><div class="wrap" style="padding:0 16px"><b>静岡市 放課後等デイサービスガイド</b>　管理画面</div></header><main class="wrap"><div class="panel"><h2 style="margin-top:0">Excelを取り込む</h2><p class="muted">GoogleスプレッドシートからダウンロードしたExcelを、そのまま選択してください。CSVへの変換は不要です。</p><input id="file" type="file" accept=".xlsx,.xls" onchange="importExcel(event)"><p id="msg" class="muted"></p></div><div class="panel"><div class="toolbar"><input id="q" placeholder="事業所名・住所・学校名で検索"><select id="pub"><option value="">公開状態：すべて</option><option>公開</option><option>非公開</option></select></div><div id="list"></div></div><div id="edit" class="panel" style="display:none"></div></main>
+</style></head><body><header><div class="wrap" style="padding:0 16px"><b>静岡市 放課後等デイサービスガイド</b>　管理画面</div></header><main class="wrap"><div class="panel"><h2 style="margin-top:0">Excelを取り込む</h2><p class="muted">GoogleスプレッドシートからダウンロードしたExcelを、そのまま選択してください。CSVへの変換は不要です。<br>ログイン後に取り込むと、登録済みの事業所との<b>差分（新規・変更）</b>を確認してから一括登録できます。</p><input id="file" type="file" accept=".xlsx,.xls" onchange="importExcel(event)"><p id="msg" class="muted"></p></div><div class="panel"><div class="toolbar"><input id="q" placeholder="事業所名・住所・学校名で検索"><select id="pub"><option value="">公開状態：すべて</option><option>公開</option><option>非公開</option></select><button class="btn green" onclick="bulkPublish('公開')">表示中を一括公開</button><button class="btn" style="background:#e8eef3" onclick="bulkPublish('非公開')">表示中を一括非公開</button></div><div id="list"></div></div><div id="edit" class="panel" style="display:none"></div></main>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -41,27 +41,87 @@ function formatTime(v){
 }
 function time(a,b){a=formatTime(a);b=formatTime(b);return a&&b?`${a}〜${b}`:a||b||''}
 function get(r,...ns){for(const n of ns)if(r[n]!==''&&r[n]!=null)return r[n];return ''}
-function normalize(r,i){return {id:get(r,'事業所ID')||'SVD-'+String(i+1).padStart(3,'0'),name:get(r,'事業所名'),types:split(get(r,'事業所の型')),ward:get(r,'静岡市区'),address:get(r,'事業所住所'),phone:get(r,'電話番号'),hp:get(r,'ホームページURL'),weekday:time(get(r,'平日の営業開始時間'),get(r,'平日の営業終了時間')),holiday:time(get(r,'休日・長期休暇の営業開始時間'),get(r,'休日・長期休暇の営業終了時間')),openDays:split(get(r,'営業日')).join('・'),closedDays:split(get(r,'閉所日')).join('・'),transport:get(r,'送迎サービス'),food:get(r,'食事提供'),schools:split(get(r,'主な通学先')),appeal:get(r,'事業所の説明（アピールポイント）'),photo1:get(r,'事業所写真①'),photo2:get(r,'事業所写真②'),photo3:get(r,'事業所写真③'),published:get(r,'公開')||'非公開'}}
+function normalize(r,i){return {id:get(r,'事業所ID')||'SVD-'+String(i+1).padStart(3,'0'),name:get(r,'事業所名'),kana:get(r,'ふりがな','事業所名（ふりがな）','事業所名ふりがな'),_hasId:!!get(r,'事業所ID'),types:split(get(r,'事業所の型')),ward:get(r,'静岡市区'),address:get(r,'事業所住所'),phone:get(r,'電話番号'),hp:get(r,'ホームページURL'),weekday:time(get(r,'平日の営業開始時間'),get(r,'平日の営業終了時間')),holiday:time(get(r,'休日・長期休暇の営業開始時間'),get(r,'休日・長期休暇の営業終了時間')),openDays:split(get(r,'営業日')).join('・'),closedDays:split(get(r,'閉所日')).join('・'),transport:get(r,'送迎サービス'),food:get(r,'食事提供'),schools:split(get(r,'主な通学先')),appeal:get(r,'事業所の説明（アピールポイント）'),photo1:get(r,'事業所写真①'),photo2:get(r,'事業所写真②'),photo3:get(r,'事業所写真③'),published:get(r,'公開')||'非公開'}}
+
+/* ===== 差分取り込み ===== */
+const KEYS=['name','kana','types','ward','address','phone','hp','weekday','holiday','openDays','closedDays','transport','food','schools','appeal','photo1','photo2','photo3'];
+const LABEL={name:'事業所名',kana:'ふりがな',types:'事業所の型',ward:'区',address:'住所',phone:'電話',hp:'HP',weekday:'平日の時間',holiday:'休日の時間',openDays:'営業日',closedDays:'閉所日',transport:'送迎',food:'食事',schools:'主な通学先',appeal:'説明',photo1:'写真①',photo2:'写真②',photo3:'写真③'};
+const val=(r,k)=>Array.isArray(r[k])?r[k].join('、'):String(r[k]??'').trim();
+const nkey=s=>String(s||'').normalize('NFKC').replace(/\s+/g,'');
+let plan=[];
+function buildPlan(imp){
+ const byId=new Map(rows.map(r=>[r.id,r])),byName=new Map(rows.map(r=>[nkey(r.name),r]));
+ let max=Math.max(0,...rows.map(r=>parseInt(String(r.id).replace(/\D/g,''))||0));
+ plan=imp.map(n=>{
+  const old=(n._hasId&&byId.get(n.id))||byName.get(nkey(n.name));
+  if(!old){const id=n._hasId?n.id:'SVD-'+String(++max).padStart(3,'0');return {type:'new',id,data:{...n,id}}}
+  const diffs=KEYS.filter(k=>!(k==='kana'&&!val(n,k))&&val(n,k)!==val(old,k)).map(k=>({k,from:val(old,k),to:val(n,k)}));
+  return {type:diffs.length?'chg':'same',id:old.id,data:n,diffs};
+ });
+ renderPlan();
+}
+function renderPlan(){
+ let p=$('plan');if(!p){p=document.createElement('div');p.id='plan';p.className='panel';$('list').parentNode.before(p)}
+ const n=plan.filter(x=>x.type==='new').length,c=plan.filter(x=>x.type==='chg').length,s=plan.length-n-c;
+ p.innerHTML=`<h2 style="margin-top:0">取り込みの差分</h2><p class="muted">新規 ${n}件 ／ 変更あり ${c}件 ／ 変更なし ${s}件<br>新規は初期状態で選択済み、変更ありは内容を確認して選択してください（変更は差分の項目だけ更新され、公開状態は変わりません）。</p>`
+ +plan.map((x,i)=>x.type==='same'?'':`<div class="provider"><label><input type="checkbox" class="pchk" data-i="${i}" ${x.type==='new'?'checked':''}> <span class="status ${x.type==='new'?'open':''}">${x.type==='new'?'新規':'変更'}</span> <b>${esc(x.data.name)}</b> <span class="muted">${esc(x.id)}</span></label>${(x.diffs||[]).map(d=>`<div class="muted" style="margin-top:4px">${esc(LABEL[d.k])}：${esc(d.from||'(空)')} → <b>${esc(d.to||'(空)')}</b></div>`).join('')}</div>`).join('')
+ +(n+c?'':'<p class="muted">登録が必要な差分はありません。</p>')
+ +`<div class="actions"><button class="btn" onclick="document.querySelectorAll('.pchk').forEach(c=>c.checked=true)">すべて選択</button><button class="btn" onclick="$('plan').remove()">閉じる</button><button class="btn green" onclick="applyPlan()">選択した分を一括登録</button></div>`;
+ p.scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function saveBatches(ops){
+ for(let i=0;i<ops.length;i+=400){const b=db.batch();ops.slice(i,i+400).forEach(f=>f(b));await b.commit()}
+}
+async function applyPlan(){
+ const sel=[...document.querySelectorAll('.pchk:checked')].map(c=>plan[+c.dataset.i]);
+ if(!sel.length){alert('登録する事業所を選んでください。');return}
+ if(!confirm(sel.length+'件を登録します。よろしいですか？'))return;
+ try{
+  await saveBatches(sel.map(x=>b=>{
+   const ref=db.collection('providers').doc(x.id);
+   if(x.type==='new'){const d={...x.data};delete d._hasId;b.set(ref,d)}
+   else{const d={};x.diffs.forEach(df=>d[df.k]=x.data[df.k]);b.set(ref,d,{merge:true})}
+  }));
+  if($('plan'))$('plan').remove();await loadFirestore();alert(sel.length+'件を登録しました。')
+ }catch(e){alert('登録に失敗しました：'+e.message)}
+}
+/* ===== 一括公開／非公開（表示中の一覧が対象） ===== */
+function getFiltered(){
+ const s=$('q').value.trim().toLowerCase(),p=$('pub').value;
+ return rows.filter(r=>(!s||[r.name,r.address,r.ward,...(r.schools||[])].join(' ').toLowerCase().includes(s))&&(!p||r.published===p));
+}
+async function bulkPublish(state){
+ if(!auth.currentUser){alert('先に管理者ログインをしてください。');return}
+ const a=getFiltered();
+ if(!a.length){alert('対象の事業所がありません。');return}
+ if(!confirm('表示中の'+a.length+'件を「'+state+'」にします。よろしいですか？'))return;
+ try{
+  await saveBatches(a.map(r=>b=>b.set(db.collection('providers').doc(r.id),{published:state},{merge:true})));
+  a.forEach(r=>r.published=state);render();alert('完了しました。')
+ }catch(e){alert('保存に失敗しました：'+e.message)}
+}
 
 function importExcel(e){
- const f=e.target.files[0];if(!f)return;$('msg').textContent='読み込み中…';
+ const f=e.target.files[0];if(!f)return;
+ if(!auth.currentUser){alert('先に管理者ログインをしてください（登録済みデータとの比較に必要です）。');e.target.value='';return}
+ $('msg').textContent='読み込み中…';setTimeout(()=>{e.target.value=''},0);
  const rd=new FileReader();rd.onload=x=>{try{
   const wb=XLSX.read(x.target.result,{type:'array',cellDates:true});
   const sn=wb.SheetNames.find(n=>n==='フォームの回答 1')||wb.SheetNames[0];
-  rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{defval:'',raw:true}).map(normalize).filter(r=>r.name);
-  $('msg').textContent=`${rows.length}件を読み込みました。公開/保存はログイン後に実行できます。`;render();
+  const imported=XLSX.utils.sheet_to_json(wb.Sheets[sn],{defval:'',raw:true}).map(normalize).filter(r=>r.name);
+  $('msg').textContent=`Excelから${imported.length}件を読み込みました。登録済みデータとの差分を確認してください。`;buildPlan(imported);
  }catch(err){$('msg').textContent='読み込みに失敗しました：'+err.message}}
  rd.readAsArrayBuffer(f)
 }
 function render(){
- const s=$('q').value.trim().toLowerCase(),p=$('pub').value;
- const a=rows.filter(r=>(!s||[r.name,r.address,r.ward,...r.schools].join(' ').toLowerCase().includes(s))&&(!p||r.published===p));
+ const a=getFiltered();
  $('list').innerHTML=a.length?a.map(r=>`<div class="provider"><div style="display:flex;justify-content:space-between;gap:10px"><div><h3>${esc(r.name)}</h3><div class="muted">${esc(r.id)}　${esc(r.ward)}　${esc(r.address)}</div><div style="margin-top:7px">${r.types.map(t=>`<span class="status">${esc(t)}</span>`).join(' ')}</div><div class="muted" style="margin-top:8px">平日 ${esc(r.weekday)}　｜　休日・長期休暇 ${esc(r.holiday)}<br>営業日 ${esc(r.openDays)}　｜　閉所日 ${esc(r.closedDays)}</div></div><div><span class="status ${r.published==='公開'?'open':''}">${esc(r.published)}</span><button class="btn" onclick="edit('${esc(r.id)}')">編集</button></div></div></div>`).join(''):'<p class="muted">該当する事業所はありません。</p>';
 }
 function edit(id){
  const r=rows.find(x=>x.id===id);if(!r)return;$('edit').style.display='block';
  $('edit').innerHTML=`<h2 style="margin-top:0">事業所を編集</h2><div class="grid">
  <div class="field"><label>事業所名</label><input id="e_name" value="${esc(r.name)}"></div><div class="field"><label>静岡市区</label><input id="e_ward" value="${esc(r.ward)}"></div>
+ <div class="field full"><label>ふりがな（名前順の並び替えに使います）</label><input id="e_kana" value="${esc(r.kana||'')}" placeholder="例：しずおかでいさーびす"></div>
  <div class="field full"><label>事業所住所</label><input id="e_address" value="${esc(r.address)}"></div><div class="field"><label>電話番号</label><input id="e_phone" value="${esc(r.phone)}"></div><div class="field"><label>ホームページURL</label><input id="e_hp" value="${esc(r.hp)}"></div>
  <div class="field"><label>平日の営業時間</label><input id="e_weekday" value="${esc(r.weekday)}"></div><div class="field"><label>休日・長期休暇の営業時間</label><input id="e_holiday" value="${esc(r.holiday)}"></div>
  <div class="field"><label>営業日</label><input id="e_open" value="${esc(r.openDays)}"></div><div class="field"><label>閉所日</label><input id="e_closed" value="${esc(r.closedDays)}"></div>
@@ -77,7 +137,7 @@ function edit(id){
 }
 async function save(id){
  const r=rows.find(x=>x.id===id);if(!r)return;
- Object.assign(r,{name:$('e_name').value.trim(),ward:$('e_ward').value.trim(),address:$('e_address').value.trim(),phone:$('e_phone').value.trim(),hp:$('e_hp').value.trim(),weekday:$('e_weekday').value.trim(),holiday:$('e_holiday').value.trim(),openDays:$('e_open').value.trim(),closedDays:$('e_closed').value.trim(),transport:$('e_transport').value.trim(),food:$('e_food').value.trim(),schools:split($('e_schools').value),appeal:$('e_appeal').value.trim(),photo1:$('e_photo1').value.trim(),photo2:$('e_photo2').value.trim(),photo3:$('e_photo3').value.trim(),published:$('e_pub').value});
+ Object.assign(r,{name:$('e_name').value.trim(),kana:$('e_kana').value.trim(),ward:$('e_ward').value.trim(),address:$('e_address').value.trim(),phone:$('e_phone').value.trim(),hp:$('e_hp').value.trim(),weekday:$('e_weekday').value.trim(),holiday:$('e_holiday').value.trim(),openDays:$('e_open').value.trim(),closedDays:$('e_closed').value.trim(),transport:$('e_transport').value.trim(),food:$('e_food').value.trim(),schools:split($('e_schools').value),appeal:$('e_appeal').value.trim(),photo1:$('e_photo1').value.trim(),photo2:$('e_photo2').value.trim(),photo3:$('e_photo3').value.trim(),published:$('e_pub').value});
  if(!auth.currentUser){alert('先に管理者ログインをしてください。');return}
  try{await db.collection('providers').doc(r.id).set(r);$('edit').style.display='none';render();alert('Firestoreに保存しました。')}catch(e){alert('保存に失敗しました：'+e.message)}
 }
