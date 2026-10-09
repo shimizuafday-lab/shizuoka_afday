@@ -1,6 +1,55 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>静岡市 放課後等デイサービスガイド｜管理</title><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><style>
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;background:#f5f9fc;color:#243447}header{background:linear-gradient(135deg,#1677c8,#16a58b);color:#fff;padding:18px 16px}.wrap{max-width:1100px;margin:auto;padding:20px 16px}.panel{background:#fff;border-radius:18px;box-shadow:0 5px 22px #1b49651a;padding:18px;margin-bottom:16px}.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:#1677c8;color:#fff}.green{background:#16a58b;color:#fff}.muted{color:#667784;font-size:13px}.toolbar{display:flex;gap:10px;flex-wrap:wrap}.toolbar input,.toolbar select,.field input,.field textarea,.field select{padding:10px;border:1px solid #d5e1e8;border-radius:10px;width:100%}.provider{border:1px solid #dfe9ef;border-radius:14px;padding:14px;margin-top:10px}.provider h3{margin:0 0 7px}.status{display:inline-block;padding:5px 8px;border-radius:999px;font-size:12px;font-weight:800;background:#fff3cd}.status.open{background:#dff7ec;color:#147a58}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}.field label{display:block;font-weight:800;font-size:13px;margin-bottom:5px}.checks{display:flex;gap:7px;flex-wrap:wrap}.checks label{border:1px solid #d5e1e8;border-radius:999px;padding:8px 10px;font-size:12px}.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}.photoPreview{margin-top:8px;min-height:72px;border:1px dashed #d5e1e8;border-radius:10px;background:#f8fbfd;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px;color:#667784;font-size:12px}.photoPreview img{display:block;max-width:100%;max-height:180px;border-radius:8px;object-fit:contain}@media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
-</style></head><body><header><div class="wrap" style="padding:0 16px"><b>静岡市 放課後等デイサービスガイド</b>　管理画面</div></header><main class="wrap"><div class="panel"><h2 style="margin-top:0">Excelを取り込む</h2><p class="muted">GoogleスプレッドシートからダウンロードしたExcelを、そのまま選択してください。CSVへの変換は不要です。<br>ログイン後に取り込むと、登録済みの事業所との<b>差分（新規・変更）</b>を確認してから一括登録できます。</p><input id="file" type="file" accept=".xlsx,.xls" onchange="importExcel(event)"><p id="msg" class="muted"></p></div><div class="panel"><div class="toolbar"><input id="q" placeholder="事業所名・住所・学校名で検索"><select id="pub"><option value="">公開状態：すべて</option><option>公開</option><option>非公開</option></select><button class="btn green" onclick="bulkPublish('公開')">表示中を一括公開</button><button class="btn" style="background:#e8eef3" onclick="bulkPublish('非公開')">表示中を一括非公開</button></div><div id="list"></div></div><div id="edit" class="panel" style="display:none"></div></main>
+:root{--c1:#1677c8;--c2:#16a58b;--ink:#1f3140;--mute:#667784;--line:#e3edf2}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#f1f6f9;color:var(--ink);-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:30;background:linear-gradient(135deg,#1677c8,#16a58b);color:#fff;box-shadow:0 4px 16px rgba(22,70,100,.18)}
+.hbar{max-width:1100px;margin:auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand b{font-size:16px}.brand small{display:block;font-size:11px;opacity:.92;margin-top:2px}
+.hbtn{border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer}
+.wrap{max-width:1100px;margin:auto;padding:18px 16px 60px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 4px 18px rgba(22,70,100,.07);padding:18px;margin-bottom:16px}
+.panel h2{font-size:16px;margin:0 0 6px}
+.btn{border:0;border-radius:11px;padding:10px 15px;font-weight:800;font-size:14px;cursor:pointer;background:#e8eff4;color:#34505f;font-family:inherit}
+.btn:hover{filter:brightness(.96)}
+.primary{background:var(--c1);color:#fff}.green{background:var(--c2);color:#fff}
+.muted{color:var(--mute);font-size:13px;line-height:1.7}
+body:not(.authed) .needauth{display:none !important}
+input[type=file]{width:100%;padding:16px;border:2px dashed #bcd3e0;border-radius:14px;background:#f7fbfd;font-size:14px;cursor:pointer;font-family:inherit}
+input[type=file]::file-selector-button{border:0;border-radius:9px;background:var(--c1);color:#fff;font-weight:800;padding:9px 14px;margin-right:12px;cursor:pointer}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.stat b{display:block;font-size:24px;line-height:1.2}.stat span{font-size:12px;color:var(--mute);font-weight:700}.stat.ok b{color:#147a58}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.toolbar input{flex:1 1 240px;width:auto}.toolbar select{flex:0 0 170px;width:auto}
+.toolbar input,.toolbar select,.field input,.field textarea,.field select{padding:11px 12px;border:1.5px solid #d8e5ec;border-radius:11px;width:100%;font-size:14px;font-family:inherit;color:var(--ink);background:#fff}
+.toolbar input:focus,.toolbar select:focus,.field input:focus,.field textarea:focus,.field select:focus{outline:0;border-color:var(--c1);box-shadow:0 0 0 3px rgba(22,119,200,.15)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:14px}
+.pcard{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;display:flex;flex-direction:column;transition:box-shadow .15s}
+.pcard:hover{box-shadow:0 8px 24px rgba(22,70,100,.14)}
+.pthumb{height:130px;background:#eaf3f8;position:relative;display:flex;align-items:center;justify-content:center;color:#8aa0ad;font-size:12px;font-weight:800}
+.pthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.pthumb .status{position:absolute;right:10px;top:10px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.pbody{padding:12px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.pbody h3{margin:0;font-size:16px;line-height:1.4}
+.ptimes{font-size:12.5px;color:#4d5f6c;line-height:1.7}
+.tags{display:flex;gap:5px;flex-wrap:wrap}
+.tag{padding:4px 9px;border-radius:999px;background:#eaf5ff;color:var(--c1);font-size:11.5px;font-weight:800}
+.pfoot{padding:0 14px 14px}.pfoot .btn{width:100%}
+.provider{border:1px solid #dfe9ef;border-radius:14px;padding:12px 14px;margin-top:10px}
+.provider label{display:flex;gap:8px;align-items:center;flex-wrap:wrap;cursor:pointer}
+.status{display:inline-block;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:800;background:#fff3cd;color:#8a6500}
+.status.open{background:#dff7ec;color:#147a58}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}
+.field label{display:block;font-weight:800;font-size:13px;margin-bottom:5px}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+#login{max-width:420px;margin:40px auto}#login .grid{grid-template-columns:1fr}
+#edit{position:fixed;top:0;right:0;bottom:0;width:min(680px,100%);z-index:60;margin:0;border-radius:18px 0 0 18px;overflow:auto;box-shadow:0 0 0 100vmax rgba(10,30,45,.45),-12px 0 48px rgba(10,30,45,.3)}
+.edith{position:sticky;top:-18px;z-index:2;background:#fff;margin:-18px -18px 16px !important;padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+.edith small{margin-left:10px;color:var(--mute);font-size:12px;font-weight:700}
+#edit .actions{position:sticky;bottom:-18px;background:#fff;padding:12px 0 4px;border-top:1px solid var(--line);margin-bottom:-4px}
+.photoPreview{margin-top:8px;min-height:72px;border:1px dashed #d5e1e8;border-radius:10px;background:#f8fbfd;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px;color:#667784;font-size:12px}.photoPreview img{display:block;max-width:100%;max-height:180px;border-radius:8px;object-fit:contain}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.stats{grid-template-columns:repeat(2,1fr)}.toolbar select{flex:1 1 100%}#edit{border-radius:0}.pgrid{grid-template-columns:1fr}}
+</style></head><body><header><div class="hbar"><div class="brand"><b>静岡市 放課後等デイサービスガイド</b><small>管理画面</small></div><button class="hbtn needauth" onclick="auth.signOut()">ログアウト</button></div></header><main class="wrap"><div class="panel needauth"><h2 style="margin-top:0">Excelを取り込む</h2><p class="muted">GoogleスプレッドシートからダウンロードしたExcelを、そのまま選択してください。CSVへの変換は不要です。<br>ログイン後に取り込むと、登録済みの事業所との<b>差分（新規・変更）</b>を確認してから一括登録できます。</p><input id="file" type="file" accept=".xlsx,.xls" onchange="importExcel(event)"><p id="msg" class="muted"></p></div><div id="stats" class="stats needauth"></div><div class="panel needauth"><div class="toolbar"><input id="q" placeholder="事業所名・住所・学校名で検索"><select id="pub"><option value="">公開状態：すべて</option><option>公開</option><option>非公開</option></select><button class="btn green" onclick="bulkPublish('公開')">表示中を一括公開</button><button class="btn" style="background:#e8eef3" onclick="bulkPublish('非公開')">表示中を一括非公開</button></div><div id="list"></div></div><div id="edit" class="panel needauth" style="display:none"></div></main>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -114,19 +163,20 @@ function importExcel(e){
  rd.readAsArrayBuffer(f)
 }
 function render(){
- const a=getFiltered();
- $('list').innerHTML=a.length?a.map(r=>`<div class="provider"><div style="display:flex;justify-content:space-between;gap:10px"><div><h3>${esc(r.name)}</h3><div class="muted">${esc(r.id)}　${esc(r.ward)}　${esc(r.address)}</div><div style="margin-top:7px">${r.types.map(t=>`<span class="status">${esc(t)}</span>`).join(' ')}</div><div class="muted" style="margin-top:8px">平日 ${esc(r.weekday)}　｜　休日・長期休暇 ${esc(r.holiday)}<br>営業日 ${esc(r.openDays)}　｜　閉所日 ${esc(r.closedDays)}</div></div><div><span class="status ${r.published==='公開'?'open':''}">${esc(r.published)}</span><button class="btn" onclick="edit('${esc(r.id)}')">編集</button></div></div></div>`).join(''):'<p class="muted">該当する事業所はありません。</p>';
+ const a=getFiltered(),pubN=rows.filter(r=>r.published==='公開').length;
+ if($('stats'))$('stats').innerHTML=`<div class="stat"><b>${rows.length}</b><span>登録事業所</span></div><div class="stat ok"><b>${pubN}</b><span>公開中</span></div><div class="stat"><b>${rows.length-pubN}</b><span>非公開</span></div><div class="stat"><b>${a.length}</b><span>表示中</span></div>`;
+ $('list').innerHTML=a.length?`<div class="pgrid">`+a.map(r=>{const ph=photoPreview(r.photo1||r.photo2||r.photo3);return `<div class="pcard"><div class="pthumb">${ph?`<img src="${esc(ph)}" loading="lazy" alt="" onerror="this.remove()">`:'写真なし'}<span class="status ${r.published==='公開'?'open':''}">${esc(r.published)}</span></div><div class="pbody"><h3>${esc(r.name)}</h3><div class="muted">${esc(r.id)}　${esc(r.ward)}</div><div class="muted">${esc(r.address)}</div><div class="tags">${(r.types||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div><div class="ptimes">平日 ${esc(r.weekday)}<br>休日・長期休暇 ${esc(r.holiday)}<br>営業日 ${esc(r.openDays)}　閉所日 ${esc(r.closedDays)}</div></div><div class="pfoot"><button class="btn" onclick="edit('${esc(r.id)}')">編集</button></div></div>`}).join('')+`</div>`:'<p class="muted" style="margin-top:14px">該当する事業所はありません。</p>';
 }
 function edit(id){
  const r=rows.find(x=>x.id===id);if(!r)return;$('edit').style.display='block';
- $('edit').innerHTML=`<h2 style="margin-top:0">事業所を編集</h2><div class="grid">
+ $('edit').innerHTML=`<h2 class="edith">事業所を編集<small>${esc(r.id)}</small></h2><div class="grid">
  <div class="field"><label>事業所名</label><input id="e_name" value="${esc(r.name)}"></div><div class="field"><label>静岡市区</label><input id="e_ward" value="${esc(r.ward)}"></div>
  <div class="field full"><label>ふりがな（名前順の並び替えに使います）</label><input id="e_kana" value="${esc(r.kana||'')}" placeholder="例：しずおかでいさーびす"></div>
  <div class="field full"><label>事業所住所</label><input id="e_address" value="${esc(r.address)}"></div><div class="field"><label>電話番号</label><input id="e_phone" value="${esc(r.phone)}"></div><div class="field"><label>ホームページURL</label><input id="e_hp" value="${esc(r.hp)}"></div>
  <div class="field"><label>平日の営業時間</label><input id="e_weekday" value="${esc(r.weekday)}"></div><div class="field"><label>休日・長期休暇の営業時間</label><input id="e_holiday" value="${esc(r.holiday)}"></div>
  <div class="field"><label>営業日</label><input id="e_open" value="${esc(r.openDays)}"></div><div class="field"><label>閉所日</label><input id="e_closed" value="${esc(r.closedDays)}"></div>
  <div class="field"><label>送迎サービス</label><input id="e_transport" value="${esc(r.transport)}"></div><div class="field"><label>食事提供</label><input id="e_food" value="${esc(r.food)}"></div>
- <div class="field full"><label>主な通学先</label><textarea id="e_schools" rows="4">${esc(r.schools.join('\\n'))}</textarea></div><div class="field full"><label>事業所の説明（アピールポイント）</label><textarea id="e_appeal" rows="5">${esc(r.appeal)}</textarea></div>
+ <div class="field full"><label>主な通学先</label><textarea id="e_schools" rows="4">${esc((r.schools||[]).join('\n'))}</textarea></div><div class="field full"><label>事業所の説明（アピールポイント）</label><textarea id="e_appeal" rows="5">${esc(r.appeal)}</textarea></div>
  <div class="field full"><label>写真①</label><input id="e_photo1" value="${esc(r.photo1)}" placeholder="Google Driveの共有リンクなど"><div class="photoPreview"><img id="p_photo1" src="${esc(photoPreview(r.photo1))}" onerror="this.style.display='none'" ${r.photo1?'':'style="display:none"'}><span id="pt_photo1">${r.photo1?'':'写真①は未登録です'}</span></div></div>
  <div class="field full"><label>写真②</label><input id="e_photo2" value="${esc(r.photo2)}" placeholder="Google Driveの共有リンクなど"><div class="photoPreview"><img id="p_photo2" src="${esc(photoPreview(r.photo2))}" onerror="this.style.display='none'" ${r.photo2?'':'style="display:none"'}><span id="pt_photo2">${r.photo2?'':'写真②は未登録です'}</span></div></div>
  <div class="field full"><label>写真③</label><input id="e_photo3" value="${esc(r.photo3)}" placeholder="Google Driveの共有リンクなど"><div class="photoPreview"><img id="p_photo3" src="${esc(photoPreview(r.photo3))}" onerror="this.style.display='none'" ${r.photo3?'':'style="display:none"'}><span id="pt_photo3">${r.photo3?'':'写真③は未登録です'}</span></div></div>
@@ -148,6 +198,7 @@ async function loadFirestore(){
 }
 function showLogin(){if($('login'))return;const p=document.createElement('div');p.id='login';p.className='panel';p.innerHTML=`<h2 style="margin-top:0">管理者ログイン</h2><div class="grid"><div class="field"><label>メールアドレス</label><input id="loginEmail" type="email"></div><div class="field"><label>パスワード</label><input id="loginPass" type="password"></div></div><div class="actions"><button class="btn primary" onclick="login()">ログイン</button></div><p id="loginMsg" class="muted"></p>`;document.querySelector('main').prepend(p)}
 async function login(){try{await auth.signInWithEmailAndPassword($('loginEmail').value,$('loginPass').value)}catch(e){$('loginMsg').textContent='ログインできません：'+e.message}}
-auth.onAuthStateChanged(u=>{if(u){if($('login'))$('login').remove();loadFirestore()}else showLogin()});
+auth.onAuthStateChanged(u=>{document.body.classList.toggle('authed',!!u);if(u){if($('login'))$('login').remove();loadFirestore()}else{rows=[];plan=[];if($('plan'))$('plan').remove();$('edit').style.display='none';render();showLogin()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('edit').style.display='none';if(e.key==='Enter'&&e.target&&e.target.id==='loginPass')login()});
 $('q').oninput=render;$('pub').onchange=render;render();
 </script></body></html>

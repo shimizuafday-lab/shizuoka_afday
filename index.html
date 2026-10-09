@@ -329,7 +329,61 @@
   }
 }
 
-</style></head><body><header><div class="head"><div><h1>静岡市 放課後等デイサービスガイド</h1><div class="sub">保護者の方が事業所を探すための情報サイト</div></div><button class="menuBtn" onclick="openMenu()">☰</button></div></header><main><div id="menu" class="menu"><details><summary>利用方法</summary><p>気になる事業所の情報をご確認いただき、見学・体験や現在の対応状況について各事業所へ直接お問い合わせください。</p><div class="menuGuideImages"><img src="assets/guide_flow.jpg" alt="放デイに通うためのリスト" onclick="openGuideImage(this.src)"><img src="assets/guide_about.jpg" alt="放課後等デイサービスってなに？" onclick="openGuideImage(this.src)"><div class="menuGuideNote">※画像をタップすると拡大してご覧いただけます。</div></div></details><details><summary>事業所の支援タイプについて</summary><div id="typeHelp">
+
+/* ===== UI refresh v40 ===== */
+:root{--c1:#1677c8;--c2:#16a58b;--ink:#1f3140;--mute:#667784;--line:#e3edf2;--bg:#f3f8fb}
+body{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+header{position:relative;overflow:hidden;padding:26px 16px 36px;background:linear-gradient(135deg,#1677c8 0%,#139fb0 55%,#16a58b 100%)}
+header:before,header:after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.12);pointer-events:none}
+header:before{width:250px;height:250px;right:-60px;top:-120px}
+header:after{width:150px;height:150px;left:-40px;bottom:-95px}
+.head{position:relative;z-index:1}
+h1{font-size:22px;line-height:1.35;letter-spacing:.02em}
+.sub{font-size:12.5px;opacity:.93;margin-top:6px}
+.menuBtn{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:999px;padding:9px 16px;font-size:13px;white-space:nowrap;backdrop-filter:blur(4px)}
+main{max-width:1100px;margin:-20px auto 0;padding:0 16px 40px;position:relative;z-index:2}
+.search{padding:16px;margin-bottom:12px;border:1px solid var(--line);box-shadow:0 8px 28px rgba(22,70,100,.12)}
+input,select{font-family:inherit;color:var(--ink)}
+#q{padding:13px 14px 13px 44px;font-size:16px;border:1.5px solid #d8e5ec;border-radius:13px;background:#f9fcfd url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23889aa6' stroke-width='2.4' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>") no-repeat 14px center}
+#q:focus,select:focus{outline:0;border-color:var(--c1);box-shadow:0 0 0 3px rgba(22,119,200,.15)}
+.chips{display:flex;gap:7px;overflow-x:auto;margin:12px -4px 0;padding:2px 4px 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1.5px solid #d8e5ec;background:#fff;color:#4b6070;border-radius:999px;padding:8px 13px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit}
+.chip.on{background:var(--c1);border-color:var(--c1);color:#fff;box-shadow:0 4px 10px rgba(22,119,200,.28)}
+#type{display:none}
+.filters{grid-template-columns:1fr 1fr !important;margin-top:6px}
+.filters #sort{grid-column:auto}
+.filters select{font-size:14px;font-weight:700;padding:11px 10px;background:#fff}
+.count{font-size:13px;color:var(--mute);font-weight:800;margin:4px 4px 12px}
+.cards{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.cards .empty{grid-column:1/-1}
+.card{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:20px;transition:transform .18s,box-shadow .18s}
+.card:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(22,70,100,.18)}
+.card:active{transform:scale(.99)}
+.photo{height:200px}
+.photo>span:not(.wardTag){color:#7b95a5;font-weight:800}
+.wardTag{position:absolute;left:12px;top:12px;z-index:2;background:rgba(255,255,255,.95);color:var(--c1);font-size:12px;font-weight:900;padding:5px 11px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.photoName{font-size:19px}
+.body{display:flex;flex-direction:column;gap:10px;flex:1;padding:14px 15px 15px}
+.badge{background:#eaf5ff;color:var(--c1);padding:5px 10px}
+.addr{font-size:13px;color:#566;line-height:1.5}
+.times{display:grid;gap:6px;background:#f5f9fc;border-radius:12px;padding:10px}
+.timeRow{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:800}
+.timeRow .ribbon{margin:0;min-width:100px;text-align:center;padding:5px 8px;border-radius:7px}
+.school{font-size:13px;line-height:1.6;color:#4d5f6c;border-top:1px dashed #dbe6ec;padding-top:10px}
+.school p{margin:3px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.more{margin-top:auto;text-align:right;color:var(--c1);font-weight:900;font-size:13px}
+.detail{padding:18px;border:1px solid var(--line)}
+.back{background:#fff;border:1.5px solid #d3e3ec;border-radius:999px;padding:9px 16px}
+.location,.info{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px}
+.links a{background:#eaf6f3;border:1px solid #cfe9e2}
+.appeal{border:1px solid #f6e5bf;line-height:1.85}
+.appeal div{white-space:pre-wrap;margin-top:6px}
+.empty{border:1px dashed #cfdfe8}
+.foot{max-width:1100px;margin:0 auto;padding:6px 16px 36px;text-align:center;font-size:12px;line-height:1.7;color:#7b8d99}
+@media(min-width:701px){.detailHeroMain{height:340px}.detail{padding:24px}}
+@media(max-width:700px){h1{font-size:19px}.photo{height:185px}.cards{grid-template-columns:1fr}}
+</style></head><body><header><div class="head"><div><h1>静岡市 放課後等デイサービスガイド</h1><div class="sub">保護者の方が事業所を探すための情報サイト</div></div><button class="menuBtn" onclick="openMenu()">☰ メニュー</button></div></header><main><div id="menu" class="menu"><details><summary>利用方法</summary><p>気になる事業所の情報をご確認いただき、見学・体験や現在の対応状況について各事業所へ直接お問い合わせください。</p><div class="menuGuideImages"><img src="assets/guide_flow.jpg" alt="放デイに通うためのリスト" onclick="openGuideImage(this.src)"><img src="assets/guide_about.jpg" alt="放課後等デイサービスってなに？" onclick="openGuideImage(this.src)"><div class="menuGuideNote">※画像をタップすると拡大してご覧いただけます。</div></div></details><details><summary>事業所の支援タイプについて</summary><div id="typeHelp">
 <p><b>🧩 総合型（生活能力向上）</b><br>日常生活や社会生活に必要な力を身につける支援を中心に行う事業所です。</p>
 <p><b>💡 総合型（重度）</b><br>重度の障害特性等に配慮した支援を中心に行う事業所です。</p>
 <p><b>📚 学習型</b><br>学習習慣や読み書き、数など、学習面の支援を重視する事業所です。</p>
@@ -343,8 +397,8 @@
 <p><b>🏃 運動型</b><br>運動や身体活動を取り入れた支援を行う事業所です。</p>
 <p><b>🎨 就労準備型</b><br>就労を見据えた作業活動や支援を行う事業所です。</p>
 <p><b>♿ 重心医療ケア型</b><br>重症心身障害児や医療的ケアが必要な児童の支援を行う事業所です。</p>
-</div></details><details><summary>掲載情報に関するお願い</summary><p>本ガイドに掲載されている情報は、調査・登録時点のものです。空き状況や事業所の体制などは日々変化いたします。「今見ている情報が常に最新の状態」とは限りません。もし掲載内容で少しでも気になる点がございましたら、遠慮なく各事業所へ直接お電話やウェブサイトからご連絡いただくことをお勧めします。</p></details><details><summary>掲載写真について</summary><p>各事業所のページに使用されている写真は、施設の雰囲気をお伝えするための「イメージ」です。実際の活動内容は、お子さまの特性や年齢等によって異なる場合があります。具体的な活動内容や最新の設備については、見学や体験の際にご確認ください。</p></details><details><summary>学校の表示・送迎範囲について</summary><p>「主な通学先」として表示されている学校名や実績は、その年（年度）の契約状況や送迎ルートによって随時変更されます。昨年まで実績があった学校でも、現在の定員やスタッフ配置によって対応が難しい場合、または新たに広域へ対応している場合がございます。現在の正確な対応状況については、必ず事前にお問い合わせください。</p></details></div></div></div></div><section id="listView"><div class="search"><input id="q" placeholder="事業所名・学校名・住所で検索"><div class="filters"><select id="type"><option value="">すべての支援タイプ</option>
-<option>総合型（生活能力向上）</option><option>総合型（重度）</option><option>学習型</option><option>運動型</option><option>就労準備型</option><option value="重心医ケア">重心医療ケア型</option></select><select id="ward"><option value="">すべての区別</option><option>葵区</option><option>駿河区</option><option>清水区</option></select><select id="sort"><option value="name">並び順：名前順（あいうえお）</option><option value="id">並び順：登録順</option><option value="new">並び順：新しい順</option><option value="ward">並び順：区別</option><option value="random">並び順：おまかせ（毎回ランダム）</option></select></div></div><div id="cards" class="cards"></div></section><section id="detailView" class="detail"></section></main><div id="menuModal" class="menuModal" onclick="if(event.target===this)closeMenu()"><div class="menuModalBox"><button class="menuModalClose" onclick="closeMenu()" aria-label="メニューを閉じる">×</button><h2 class="menuModalTitle">☰ MENU</h2><div id="menuModalContent"></div></div></div><div id="galleryModal" class="galleryModal" onclick="if(event.target===this)closeGallery()"><button class="galleryModalClose" onclick="closeGallery()" aria-label="写真を閉じる">×</button><img id="galleryModalImg" alt="事業所写真"><div id="galleryModalCount" class="galleryModalCount"></div></div>
+</div></details><details><summary>掲載情報に関するお願い</summary><p>本ガイドに掲載されている情報は、調査・登録時点のものです。空き状況や事業所の体制などは日々変化いたします。「今見ている情報が常に最新の状態」とは限りません。もし掲載内容で少しでも気になる点がございましたら、遠慮なく各事業所へ直接お電話やウェブサイトからご連絡いただくことをお勧めします。</p></details><details><summary>掲載写真について</summary><p>各事業所のページに使用されている写真は、施設の雰囲気をお伝えするための「イメージ」です。実際の活動内容は、お子さまの特性や年齢等によって異なる場合があります。具体的な活動内容や最新の設備については、見学や体験の際にご確認ください。</p></details><details><summary>学校の表示・送迎範囲について</summary><p>「主な通学先」として表示されている学校名や実績は、その年（年度）の契約状況や送迎ルートによって随時変更されます。昨年まで実績があった学校でも、現在の定員やスタッフ配置によって対応が難しい場合、または新たに広域へ対応している場合がございます。現在の正確な対応状況については、必ず事前にお問い合わせください。</p></details></div></div></div></div><section id="listView"><div class="search"><input id="q" placeholder="事業所名・学校名・住所で検索"><div id="typeChips" class="chips"></div><div class="filters"><select id="type"><option value="">すべての支援タイプ</option>
+<option>総合型（生活能力向上）</option><option>総合型（重度）</option><option>学習型</option><option>運動型</option><option>就労準備型</option><option value="重心医ケア">重心医療ケア型</option></select><select id="ward"><option value="">すべての区別</option><option>葵区</option><option>駿河区</option><option>清水区</option></select><select id="sort" aria-label="並び替え"><option value="name">↕ 名前順</option><option value="id">↕ 登録順</option><option value="new">↕ 新しい順</option><option value="ward">↕ 区ごと</option><option value="random">↕ ランダム</option></select></div></div><div id="count" class="count"></div><div id="cards" class="cards"><div class="empty">読み込み中…</div></div></section><section id="detailView" class="detail"></section></main><footer class="foot">掲載情報は登録時点のものです。最新の状況は各事業所へ直接お問い合わせください。</footer><div id="menuModal" class="menuModal" onclick="if(event.target===this)closeMenu()"><div class="menuModalBox"><button class="menuModalClose" onclick="closeMenu()" aria-label="メニューを閉じる">×</button><h2 class="menuModalTitle">☰ MENU</h2><div id="menuModalContent"></div></div></div><div id="galleryModal" class="galleryModal" onclick="if(event.target===this)closeGallery()"><button class="galleryModalClose" onclick="closeGallery()" aria-label="写真を閉じる">×</button><img id="galleryModalImg" alt="事業所写真"><div id="galleryModalCount" class="galleryModalCount"></div></div>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
@@ -365,7 +419,8 @@ function holidayDays(s){return dayTokens(s).filter(d=>['土','日','祝'].includ
 function driveImageUrl(u){const s=String(u||'').trim();if(!s)return '';const m=s.match(/(?:[?&]id=|\/d\/)([A-Za-z0-9_-]{20,})/);return m?`https://drive.google.com/thumbnail?id=${m[1]}&sz=w1600`:s}
 function firstPhoto(r){return driveImageUrl(r.photo1)||driveImageUrl(r.photo2)||driveImageUrl(r.photo3)||''}
 function card(r){
- return `<article class="card" onclick="showDetail('${esc(r.id)}')"><div class="photo">${firstPhoto(r)?`<img src="${esc(firstPhoto(r))}" alt="${esc(r.name)}">`:'<span>写真準備中</span>'}<div class="photoName">${esc(r.name)}</div></div><div class="body"><div class="badges">${(r.types||[]).map(t=>`<span class="badge">${esc(t)}</span>`).join('')}</div><div class="addr">📍 ${esc(r.address)}</div><div class="ribbon weekday">平日 ${esc(r.weekday||'')}</div><div class="ribbon holiday">休日・長期休暇 ${esc(r.holiday||'')}</div><div class="school"><b>🏫 主な通学先</b><br>${schools(r.schools).map(esc).join('・')}</div></div></article>`
+ const p=firstPhoto(r),sc=schools(r.schools).map(esc).join('・');
+ return `<article class="card" onclick="showDetail('${esc(r.id)}')"><div class="photo">${p?`<img loading="lazy" src="${esc(p)}" alt="${esc(r.name)}">`:'<span>写真準備中</span>'}${r.ward?`<span class="wardTag">${esc(r.ward)}</span>`:''}<div class="photoName">${esc(r.name)}</div></div><div class="body"><div class="badges">${(r.types||[]).map(t=>`<span class="badge">${esc(t)}</span>`).join('')}</div><div class="addr">📍 ${esc(r.address)}</div><div class="times"><div class="timeRow"><span class="ribbon weekday">平日</span><span>${esc(r.weekday||'—')}</span></div><div class="timeRow"><span class="ribbon holiday">休日・長期休暇</span><span>${esc(r.holiday||'—')}</span></div></div><div class="school"><b>🏫 主な通学先</b><p>${sc||'—'}</p></div><div class="more">詳しく見る →</div></div></article>`
 }
 function sortList(a){
  const b=[...a],key=r=>String(r.kana||r.name||''),jp=(x,y)=>key(x).localeCompare(key(y),'ja'),num=r=>parseInt(String(r.id).replace(/\D/g,''))||0,s=$('sort').value;
@@ -379,7 +434,7 @@ function sortList(a){
 function render(){
  const q=$('q').value.trim().toLowerCase(),type=$('type').value,ward=$('ward').value;
  const list=data.filter(r=>(!q||[r.name,r.address,r.ward,...(r.schools||[])].join(' ').toLowerCase().includes(q))&&(!type||type==='all'||(r.types||[]).includes(type))&&(!ward||ward==='all'||r.ward===ward));
- $('cards').innerHTML=list.length?sortList(list).map(card).join(''):'<div class="empty">条件に合う事業所がありません。</div>';
+ $('count').textContent=list.length+'件の事業所';$('cards').innerHTML=list.length?sortList(list).map(card).join(''):'<div class="empty">条件に合う事業所がありません。</div>';
 }
 function showDetail(id){
  const r=data.find(x=>x.id===id);if(!r)return;
@@ -405,5 +460,6 @@ $('q').oninput=render;$('type').onchange=render;$('ward').onchange=render;$('sor
 
 let touchStartX=0;let touchStartY=0;document.addEventListener('touchstart',e=>{if(e.touches.length===1){touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY}}, {passive:true});document.addEventListener('touchend',e=>{if(e.changedTouches.length!==1)return;const dx=e.changedTouches[0].clientX-touchStartX,dy=e.changedTouches[0].clientY-touchStartY;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){if($('galleryModal').classList.contains('open')){changePhoto(dx<0?1:-1);$('galleryModalImg').src=galleryPhotos[galleryIndex];$('galleryModalCount').textContent=`${galleryIndex+1} / ${galleryPhotos.length}`}else if($('detailGalleryImg')){changePhoto(dx<0?1:-1)}}}, {passive:true});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGallery();closeMenu()}else if($('galleryModal').classList.contains('open')&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){changePhoto(e.key==='ArrowRight'?1:-1);$('galleryModalImg').src=galleryPhotos[galleryIndex];$('galleryModalCount').textContent=`${galleryIndex+1} / ${galleryPhotos.length}`}});
 
+(function(){const sel=$('type'),box=$('typeChips');box.innerHTML=[...sel.options].map(o=>`<button type="button" class="chip${o.value===sel.value?' on':''}" data-v="${esc(o.value)}">${o.value===''?'すべて':esc(o.textContent)}</button>`).join('');box.onclick=e=>{const b=e.target.closest('.chip');if(!b)return;sel.value=b.dataset.v;box.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));render()}})();
 db.collection('providers').where('published','==','公開').get().then(s=>{data=s.docs.map(d=>({id:d.id,...d.data(),_rnd:Math.random()}));render()}).catch(e=>{$('cards').innerHTML='<div class="empty">現在、情報を読み込めませんでした。</div>';console.error(e)});
 </script></body></html>
