@@ -362,7 +362,7 @@ input,select{font-family:inherit;color:var(--ink)}
 .card:active{transform:scale(.99)}
 .photo{height:200px}
 .photo>span:not(.wardTag){color:#7b95a5;font-weight:800}
-.wardTag{position:absolute;left:12px;top:12px;z-index:2;background:rgba(255,255,255,.95);color:var(--c1);font-size:12px;font-weight:900;padding:5px 11px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.photoTags{position:absolute;left:12px;top:12px;z-index:2;display:flex;align-items:center;gap:6px}.iconTag{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.15)}.legend{font-weight:700;font-size:12px;color:#7b8d99}.count{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.wardTag{background:rgba(255,255,255,.95);color:var(--c1);font-size:12px;font-weight:900;padding:5px 11px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .photoName{font-size:19px}
 .body{display:flex;flex-direction:column;gap:10px;flex:1;padding:14px 15px 15px}
 .badge{background:#eaf5ff;color:var(--c1);padding:5px 10px}
@@ -418,9 +418,11 @@ function holidayDays(s){return dayTokens(s).filter(d=>['土','日','祝'].includ
 
 function driveImageUrl(u){const s=String(u||'').trim();if(!s)return '';const m=s.match(/(?:[?&]id=|\/d\/)([A-Za-z0-9_-]{20,})/);return m?`https://drive.google.com/thumbnail?id=${m[1]}&sz=w1600`:s}
 function firstPhoto(r){return driveImageUrl(r.photo1)||driveImageUrl(r.photo2)||driveImageUrl(r.photo3)||''}
+function hasSvc(v){return /^(有|あり|○|◯)/.test(String(v??'').normalize('NFKC').trim())}
+function svcTip(l,v){return esc(l+'：'+String(v).trim())}
 function card(r){
  const p=firstPhoto(r),sc=schools(r.schools).map(esc).join('・');
- return `<article class="card" onclick="showDetail('${esc(r.id)}')"><div class="photo">${p?`<img loading="lazy" src="${esc(p)}" alt="${esc(r.name)}">`:'<span>写真準備中</span>'}${r.ward?`<span class="wardTag">${esc(r.ward)}</span>`:''}<div class="photoName">${esc(r.name)}</div></div><div class="body"><div class="badges">${(r.types||[]).map(t=>`<span class="badge">${esc(t)}</span>`).join('')}</div><div class="addr">📍 ${esc(r.address)}</div><div class="times"><div class="timeRow"><span class="ribbon weekday">平日</span><span>${esc(r.weekday||'—')}</span></div><div class="timeRow"><span class="ribbon holiday">休日・長期休暇</span><span>${esc(r.holiday||'—')}</span></div></div><div class="school"><b>🏫 主な通学先</b><p>${sc||'—'}</p></div><div class="more">詳しく見る →</div></div></article>`
+ return `<article class="card" onclick="showDetail('${esc(r.id)}')"><div class="photo">${p?`<img loading="lazy" src="${esc(p)}" alt="${esc(r.name)}">`:'<span>写真準備中</span>'}<div class="photoTags">${r.ward?`<span class="wardTag">${esc(r.ward)}</span>`:''}${hasSvc(r.transport)?`<span class="iconTag" title="${svcTip('送迎',r.transport)}" aria-label="${svcTip('送迎',r.transport)}">🚗</span>`:''}${hasSvc(r.food)?`<span class="iconTag" title="${svcTip('食事',r.food)}" aria-label="${svcTip('食事',r.food)}">🍱</span>`:''}</div><div class="photoName">${esc(r.name)}</div></div><div class="body"><div class="badges">${(r.types||[]).map(t=>`<span class="badge">${esc(t)}</span>`).join('')}</div><div class="addr">📍 ${esc(r.address)}</div><div class="times"><div class="timeRow"><span class="ribbon weekday">平日</span><span>${esc(r.weekday||'—')}</span></div><div class="timeRow"><span class="ribbon holiday">休日・長期休暇</span><span>${esc(r.holiday||'—')}</span></div></div><div class="school"><b>🏫 主な通学先</b><p>${sc||'—'}</p></div><div class="more">詳しく見る →</div></div></article>`
 }
 function sortList(a){
  const b=[...a],key=r=>String(r.kana||r.name||''),jp=(x,y)=>key(x).localeCompare(key(y),'ja'),num=r=>parseInt(String(r.id).replace(/\D/g,''))||0,s=$('sort').value;
@@ -434,7 +436,7 @@ function sortList(a){
 function render(){
  const q=$('q').value.trim().toLowerCase(),type=$('type').value,ward=$('ward').value;
  const list=data.filter(r=>(!q||[r.name,r.address,r.ward,...(r.schools||[])].join(' ').toLowerCase().includes(q))&&(!type||type==='all'||(r.types||[]).includes(type))&&(!ward||ward==='all'||r.ward===ward));
- $('count').textContent=list.length+'件の事業所';$('cards').innerHTML=list.length?sortList(list).map(card).join(''):'<div class="empty">条件に合う事業所がありません。</div>';
+ $('count').innerHTML=list.length+'件の事業所<span class="legend">🚗 送迎あり　🍱 食事あり</span>';$('cards').innerHTML=list.length?sortList(list).map(card).join(''):'<div class="empty">条件に合う事業所がありません。</div>';
 }
 function showDetail(id){
  const r=data.find(x=>x.id===id);if(!r)return;

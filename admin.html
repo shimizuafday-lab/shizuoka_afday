@@ -81,6 +81,7 @@ function updatePhotoPreview(n){
  img.onload=()=>{text.textContent='';};
  img.onerror=()=>{img.style.display='none';text.textContent='画像を表示できません。Driveの共有設定やURLを確認してください。';};
 }
+function splitD(v){return String(v??'').split(/,\s*|\n/).map(x=>x.trim()).filter(Boolean)}
 function split(v){return String(v??'').split(/[,、\n]/).map(x=>x.trim()).filter(Boolean)}
 function formatTime(v){
  if(v==null||v==='')return '';
@@ -90,7 +91,7 @@ function formatTime(v){
 }
 function time(a,b){a=formatTime(a);b=formatTime(b);return a&&b?`${a}〜${b}`:a||b||''}
 function get(r,...ns){for(const n of ns)if(r[n]!==''&&r[n]!=null)return r[n];return ''}
-function normalize(r,i){return {id:get(r,'事業所ID')||'SVD-'+String(i+1).padStart(3,'0'),name:get(r,'事業所名'),kana:get(r,'ふりがな','事業所名（ふりがな）','事業所名ふりがな'),_hasId:!!get(r,'事業所ID'),types:split(get(r,'事業所の型')),ward:get(r,'静岡市区'),address:get(r,'事業所住所'),phone:get(r,'電話番号'),hp:get(r,'ホームページURL'),weekday:time(get(r,'平日の営業開始時間'),get(r,'平日の営業終了時間')),holiday:time(get(r,'休日・長期休暇の営業開始時間'),get(r,'休日・長期休暇の営業終了時間')),openDays:split(get(r,'営業日')).join('・'),closedDays:split(get(r,'閉所日')).join('・'),transport:get(r,'送迎サービス'),food:get(r,'食事提供'),schools:split(get(r,'主な通学先')),appeal:get(r,'事業所の説明（アピールポイント）'),photo1:get(r,'事業所写真①'),photo2:get(r,'事業所写真②'),photo3:get(r,'事業所写真③'),published:get(r,'公開')||'非公開'}}
+function normalize(r,i){return {id:get(r,'事業所ID')||'SVD-'+String(i+1).padStart(3,'0'),name:get(r,'事業所名'),kana:get(r,'ふりがな','事業所名（ふりがな）','事業所名ふりがな'),_hasId:!!get(r,'事業所ID'),types:split(get(r,'事業所の型')),ward:get(r,'静岡市区'),address:get(r,'事業所住所'),phone:get(r,'電話番号'),hp:get(r,'ホームページURL'),weekday:time(get(r,'平日の営業開始時間'),get(r,'平日の営業終了時間')),holiday:time(get(r,'休日・長期休暇の営業開始時間'),get(r,'休日・長期休暇の営業終了時間')),openDays:splitD(get(r,'営業日')).join('・'),closedDays:splitD(get(r,'閉所日')).join('・'),transport:get(r,'送迎サービス'),food:get(r,'食事提供'),schools:split(get(r,'主な通学先')),appeal:get(r,'事業所の説明（アピールポイント）'),photo1:get(r,'事業所写真①'),photo2:get(r,'事業所写真②'),photo3:get(r,'事業所写真③'),published:get(r,'公開')||'非公開'}}
 
 /* ===== 差分取り込み ===== */
 const KEYS=['name','kana','types','ward','address','phone','hp','weekday','holiday','openDays','closedDays','transport','food','schools','appeal','photo1','photo2','photo3'];
