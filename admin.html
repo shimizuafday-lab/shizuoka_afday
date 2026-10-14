@@ -64,7 +64,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore(), auth=firebase.auth();
-const TYPES=['総合型（生活能力向上）','総合型（重度）','学習型','運動型','就労準備型','重心医ケア'];
+const TYPES=['総合型（生活能力向上）','総合型（重度）','学習型','運動型','就労準備型','重心医ケア型'];
 let rows=[]; const $=x=>document.getElementById(x);
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function photoPreview(u){
