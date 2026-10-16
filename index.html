@@ -472,8 +472,12 @@ function render(){
  $('count').innerHTML=list.length+'件の事業所<span class="legend">🚗 送迎あり　🍱 食事あり</span>';$('cards').innerHTML=list.length?sortList(list).map(card).join(''):(favOnly?'<div class="empty">気になる事業所はまだありません。<br>カードのしおりマークを押すと、ここに集められます。<br><small>※この端末のブラウザに保存されます</small></div>':'<div class="empty">条件に合う事業所がありません。</div>');
  updateFavUI();
 }
-function showDetail(id){
+let listScroll=0;
+try{history.scrollRestoration='manual'}catch(e){}
+function showDetail(id,noPush){
  const r=data.find(x=>x.id===id);if(!r)return;
+ if($('listView').style.display!=='none')listScroll=window.scrollY;
+ if(!noPush)try{history.pushState({detail:id},'')}catch(e){}
  $('detailView').style.display='block';$('listView').style.display='none';
  const photos=[r.photo1,r.photo2,r.photo3].filter(Boolean).map(driveImageUrl);
  const hero=photos.length?`<div class="detailHero"><div class="detailHeroMain" id="detailGallery" onclick="openGallery()"><img id="detailGalleryImg" src="${esc(photos[0])}" alt="${esc(r.name)}"><div class="detailHeroName">${esc(r.name)}</div>${photos.length>1?`<div class="photoCount" id="photoCount">1 / ${photos.length}</div><button class="galleryArrow prev" onclick="event.stopPropagation();changePhoto(-1)" aria-label="前の写真">‹</button><button class="galleryArrow next" onclick="event.stopPropagation();changePhoto(1)" aria-label="次の写真">›</button>`:''}</div>${photos.length>1?`<div class="galleryDots" id="galleryDots">${photos.map((_,i)=>`<button class="galleryDot${i===0?' active':''}" onclick="event.stopPropagation();setPhoto(${i})" aria-label="写真${i+1}"></button>`).join('')}</div>`:''}</div>`:'';
@@ -491,7 +495,9 @@ function closeGallery(){$('galleryModal').classList.remove('open');document.body
 function openGuideImage(src){const m=$('galleryModal');m.style.zIndex='9999';$('galleryModalImg').src=src;$('galleryModalCount').textContent='';$('galleryModalCount').style.display='none';m.classList.add('open');document.body.style.overflow='hidden'}
 function openMenu(){const content=$('menuModalContent');content.innerHTML=$('menu').innerHTML;$('menuModal').classList.add('open');document.body.style.overflow='hidden'}
 function closeMenu(){$('menuModal').classList.remove('open');document.body.style.overflow=''}
-function back(){$('detailView').style.display='none';$('listView').style.display='block';window.scrollTo({top:0,behavior:'smooth'});closeGallery()}
+function showList(){$('detailView').style.display='none';$('listView').style.display='block';closeGallery();window.scrollTo({top:listScroll,behavior:'instant'})}
+function back(){if(history.state&&history.state.detail)history.back();else showList()}
+window.addEventListener('popstate',e=>{if(e.state&&e.state.detail)showDetail(e.state.detail,true);else showList()});
 $('q').oninput=render;$('type').onchange=render;$('ward').onchange=render;$('sort').onchange=render;
 
 let touchStartX=0;let touchStartY=0;document.addEventListener('touchstart',e=>{if(e.touches.length===1){touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY}}, {passive:true});document.addEventListener('touchend',e=>{if(e.changedTouches.length!==1)return;const dx=e.changedTouches[0].clientX-touchStartX,dy=e.changedTouches[0].clientY-touchStartY;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){if($('galleryModal').classList.contains('open')){changePhoto(dx<0?1:-1);$('galleryModalImg').src=galleryPhotos[galleryIndex];$('galleryModalCount').textContent=`${galleryIndex+1} / ${galleryPhotos.length}`}else if($('detailGalleryImg')){changePhoto(dx<0?1:-1)}}}, {passive:true});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGallery();closeMenu()}else if($('galleryModal').classList.contains('open')&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){changePhoto(e.key==='ArrowRight'?1:-1);$('galleryModalImg').src=galleryPhotos[galleryIndex];$('galleryModalCount').textContent=`${galleryIndex+1} / ${galleryPhotos.length}`}});
