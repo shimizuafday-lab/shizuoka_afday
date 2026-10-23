@@ -49,6 +49,30 @@ input[type=file]::file-selector-button{border:0;border-radius:9px;background:var
 #edit .actions{position:sticky;bottom:-18px;background:#fff;padding:12px 0 4px;border-top:1px solid var(--line);margin-bottom:-4px}
 .photoPreview{margin-top:8px;min-height:72px;border:1px dashed #d5e1e8;border-radius:10px;background:#f8fbfd;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px;color:#667784;font-size:12px}.photoPreview img{display:block;max-width:100%;max-height:180px;border-radius:8px;object-fit:contain}
 @media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.stats{grid-template-columns:repeat(2,1fr)}.toolbar select{flex:1 1 100%}#edit{border-radius:0}.pgrid{grid-template-columns:1fr}}
+
+/* ===== appeal formatting ===== */
+.appeal .apBody{white-space:normal;margin-top:6px}
+.appeal .apBody .apL{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:0;line-height:1.85}
+.appeal .apBody .apBlank{height:.9em}
+.appeal .apBody .apH{font-weight:900;color:#1677c8;margin-top:6px}
+.appeal .apBody b{font-weight:900}
+.appeal .apBody a{color:#1677c8;font-weight:700;text-decoration:underline;overflow-wrap:anywhere}
+.appeal .apBody hr.apHr{border:0;border-top:1.5px solid #ecd9a8;margin:12px 0}
+.appeal .apBody .yt{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;margin:10px 0 4px;cursor:pointer;white-space:normal}
+.appeal .apBody .yt img,.appeal .apBody .yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:cover}
+.appeal .apBody .yt .ytPlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:66px;height:46px;border-radius:13px;background:rgba(220,30,30,.93);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 3px 12px rgba(0,0,0,.35)}
+.appeal .apBody .ytLink{font-size:12px;margin:0 0 8px;white-space:normal}
+
+.appeal{background:#fff8e9;border:1px solid #f6e5bf;border-radius:14px;padding:14px;line-height:1.85}
+.apTools{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;position:relative}
+.tb{border:1.5px solid #d8e5ec;background:#fff;color:#34505f;border-radius:9px;min-width:40px;height:36px;padding:0 10px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
+.tb:hover{background:#f0f7fb}
+.emojiPanel{display:none;position:absolute;left:0;top:42px;z-index:5;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(22,70,100,.2);padding:8px;width:min(320px,100%);flex-wrap:wrap;gap:2px}
+.emojiPanel.open{display:flex}
+.emojiPanel button{border:0;background:none;font-size:22px;width:38px;height:38px;border-radius:8px;cursor:pointer}
+.emojiPanel button:hover{background:#eef6fa}
+.apHelp{font-size:12px;color:var(--mute);line-height:1.6;margin:6px 0}
+.apPrevLabel{font-size:12px;font-weight:800;color:var(--mute);margin:10px 0 4px}
 </style></head><body><header><div class="hbar"><div class="brand"><b>静岡市 放課後等デイサービスガイド</b><small>管理画面</small></div><button class="hbtn needauth" onclick="auth.signOut()">ログアウト</button></div></header><main class="wrap"><div class="panel needauth"><h2 style="margin-top:0">Excelを取り込む</h2><p class="muted">GoogleスプレッドシートからダウンロードしたExcelを、そのまま選択してください。CSVへの変換は不要です。<br>ログイン後に取り込むと、登録済みの事業所との<b>差分（新規・変更）</b>を確認してから一括登録できます。</p><input id="file" type="file" accept=".xlsx,.xls" onchange="importExcel(event)"><p id="msg" class="muted"></p></div><div id="stats" class="stats needauth"></div><div class="panel needauth"><div class="toolbar"><input id="q" placeholder="事業所名・住所・学校名で検索"><select id="pub"><option value="">公開状態：すべて</option><option>公開</option><option>非公開</option></select><button class="btn green" onclick="bulkPublish('公開')">表示中を一括公開</button><button class="btn" style="background:#e8eef3" onclick="bulkPublish('非公開')">表示中を一括非公開</button></div><div id="list"></div></div><div id="edit" class="panel needauth" style="display:none"></div></main>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -66,6 +90,24 @@ firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore(), auth=firebase.auth();
 const TYPES=['総合型（生活能力向上）','総合型（重度）','学習型','運動型','就労準備型','重心医ケア型'];
 let rows=[]; const $=x=>document.getElementById(x);
+function ytId(s){const m=String(s).trim().match(/^https?:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:[^#\s]*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})(?:[?&#]\S*)?$/);return m?m[1]:''}
+function apBold(s){return s.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')}
+function apInline(raw){let out='',last=0,m;const re=/https?:\/\/[A-Za-z0-9\-._~:\/?#\[\]@!$&'()*+,;=%]+/g;while((m=re.exec(raw))){out+=apBold(esc(raw.slice(last,m.index)));const u=m[0].replace(/[。、，．,.)）」』!！?？]+$/,''),tail=m[0].slice(u.length);out+='<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(u)+'</a>'+esc(tail);last=m.index+m[0].length}return out+apBold(esc(raw.slice(last)))}
+function fmtAppeal(t){return String(t??'').replace(/\s+$/,'').split(/\r?\n/).map(line=>{const s=line.trim();if(!s)return '<div class="apL apBlank"></div>';if(/^-{3,}$/.test(s))return '<hr class="apHr">';const id=ytId(s);if(id)return '<div class="yt" data-id="'+id+'" role="button" tabindex="0" aria-label="動画を再生" onclick="playYt(this)" onkeydown="if(event.key===\'Enter\')playYt(this)"><img loading="lazy" src="https://i.ytimg.com/vi/'+id+'/hqdefault.jpg" alt=""><span class="ytPlay">▶</span></div><div class="ytLink"><a href="'+esc(s)+'" target="_blank" rel="noopener noreferrer">YouTubeで開く</a></div>';return '<div class="apL'+(s.charAt(0)==='■'?' apH':'')+'">'+apInline(line)+'</div>'}).join('')}
+function playYt(el){const id=el.dataset.id;el.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';el.removeAttribute('onclick');el.removeAttribute('onkeydown');el.style.cursor='auto'}
+
+const EMOJIS=['🚗','🍱','🏫','📞','🕒','📅','😊','✨','⭐','🎵','🎨','📚','🏃','🌳','🧩','💡','♿','🤝','👍','❤️','🔔','⚠️','✅','📍','🧸','🎮','🍙','🧼','🌈','🙌'];
+function apEl(){return $('e_appeal')}
+function apPrev(){const p=$('apPrev');if(p)p.innerHTML=fmtAppeal(apEl().value)}
+function apTouched(){const c=$('e_appealEd');if(c)c.checked=true;apPrev()}
+function apWrap(l,r,ph){const t=apEl(),a=t.selectionStart,b=t.selectionEnd,v=t.value,sel=v.slice(a,b)||ph;t.value=v.slice(0,a)+l+sel+r+v.slice(b);t.focus();t.setSelectionRange(a+l.length,a+l.length+sel.length);apTouched()}
+function apInsert(txt,atEnd){const t=apEl(),b=t.selectionEnd,a=atEnd?b:t.selectionStart,v=t.value;t.value=v.slice(0,a)+txt+v.slice(b);t.focus();const p=a+txt.length;t.setSelectionRange(p,p);apTouched()}
+function apLine(txt){const t=apEl(),before=t.value.slice(0,t.selectionEnd),after=t.value.slice(t.selectionEnd),pre=(before===''||before.endsWith('\n'))?'':'\n',post=(after===''||after.startsWith('\n'))?'':'\n';t.value=before+pre+txt+post+after;t.focus();const p=(before+pre+txt+post).length;t.setSelectionRange(p,p);apTouched()}
+function apHead(){const t=apEl(),v=t.value,a=t.selectionStart,b=t.selectionEnd;const s=v.lastIndexOf('\n',a-1)+1;let e=v.indexOf('\n',b);if(e<0)e=v.length;const lines=v.slice(s,e).split('\n'),all=lines.every(l=>l.startsWith('■'));const out=lines.map(l=>all?l.replace(/^■\s?/,''):(l.startsWith('■')?l:'■ '+l)).join('\n');t.value=v.slice(0,s)+out+v.slice(e);t.focus();t.setSelectionRange(s,s+out.length);apTouched()}
+function apLink(){const u=prompt('リンクのURLを入力してください（https:// から始まるもの）');if(!u)return;if(!/^https?:\/\/\S+$/.test(u.trim())){alert('https:// から始まるURLを入力してください。');return}apInsert(u.trim(),true)}
+function apYt(){const u=prompt('YouTubeのURLを入力してください');if(!u)return;if(!ytId(u)){alert('YouTubeのURLではないようです。');return}apLine(u.trim())}
+function apEmojiToggle(){$('apEmoji').classList.toggle('open')}
+
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function photoPreview(u){
  const s=String(u??'').trim(); if(!s)return '';
@@ -105,15 +147,16 @@ function buildPlan(imp){
  plan=imp.map(n=>{
   const old=(n._hasId&&byId.get(n.id))||byName.get(nkey(n.name));
   if(!old){const id=n._hasId?n.id:'SVD-'+String(++max).padStart(3,'0');return {type:'new',id,data:{...n,id}}}
-  const diffs=KEYS.filter(k=>!(k==='kana'&&!val(n,k))&&val(n,k)!==val(old,k)).map(k=>({k,from:val(old,k),to:val(n,k)}));
-  return {type:diffs.length?'chg':'same',id:old.id,data:n,diffs};
+  const skipA=!!old.appealEdited&&val(n,'appeal')!==val(old,'appeal');
+  const diffs=KEYS.filter(k=>!(k==='kana'&&!val(n,k))&&!(k==='appeal'&&old.appealEdited)&&val(n,k)!==val(old,k)).map(k=>({k,from:val(old,k),to:val(n,k)}));
+  return {type:diffs.length?'chg':'same',id:old.id,data:n,diffs,skipA};
  });
  renderPlan();
 }
 function renderPlan(){
  let p=$('plan');if(!p){p=document.createElement('div');p.id='plan';p.className='panel';$('list').parentNode.before(p)}
- const n=plan.filter(x=>x.type==='new').length,c=plan.filter(x=>x.type==='chg').length,s=plan.length-n-c;
- p.innerHTML=`<h2 style="margin-top:0">取り込みの差分</h2><p class="muted">新規 ${n}件 ／ 変更あり ${c}件 ／ 変更なし ${s}件<br>新規は初期状態で選択済み、変更ありは内容を確認して選択してください（変更は差分の項目だけ更新され、公開状態は変わりません）。</p>`
+ const n=plan.filter(x=>x.type==='new').length,c=plan.filter(x=>x.type==='chg').length,s=plan.length-n-c,sk=plan.filter(x=>x.skipA).length;
+ p.innerHTML=`<h2 style="margin-top:0">取り込みの差分</h2><p class="muted">新規 ${n}件 ／ 変更あり ${c}件 ／ 変更なし ${s}件${sk?`<br>※説明を管理画面で編集済みの事業所（${sk}件）は、説明を比較していません。`:''}<br>新規は初期状態で選択済み、変更ありは内容を確認して選択してください（変更は差分の項目だけ更新され、公開状態は変わりません）。</p>`
  +plan.map((x,i)=>x.type==='same'?'':`<div class="provider"><label><input type="checkbox" class="pchk" data-i="${i}" ${x.type==='new'?'checked':''}> <span class="status ${x.type==='new'?'open':''}">${x.type==='new'?'新規':'変更'}</span> <b>${esc(x.data.name)}</b> <span class="muted">${esc(x.id)}</span></label>${(x.diffs||[]).map(d=>`<div class="muted" style="margin-top:4px">${esc(LABEL[d.k])}：${esc(d.from||'(空)')} → <b>${esc(d.to||'(空)')}</b></div>`).join('')}</div>`).join('')
  +(n+c?'':'<p class="muted">登録が必要な差分はありません。</p>')
  +`<div class="actions"><button class="btn" onclick="document.querySelectorAll('.pchk').forEach(c=>c.checked=true)">すべて選択</button><button class="btn" onclick="$('plan').remove()">閉じる</button><button class="btn green" onclick="applyPlan()">選択した分を一括登録</button></div>`;
@@ -178,18 +221,19 @@ function edit(id){
  <div class="field"><label>平日の営業時間</label><input id="e_weekday" value="${esc(r.weekday)}"></div><div class="field"><label>休日・長期休暇の営業時間</label><input id="e_holiday" value="${esc(r.holiday)}"></div>
  <div class="field"><label>営業日</label><input id="e_open" value="${esc(r.openDays)}"></div><div class="field"><label>閉所日</label><input id="e_closed" value="${esc(r.closedDays)}"></div>
  <div class="field"><label>送迎サービス</label><input id="e_transport" value="${esc(r.transport)}"></div><div class="field"><label>食事提供</label><input id="e_food" value="${esc(r.food)}"></div>
- <div class="field full"><label>主な通学先</label><textarea id="e_schools" rows="4">${esc((r.schools||[]).join('\n'))}</textarea></div><div class="field full"><label>事業所の説明（アピールポイント）</label><textarea id="e_appeal" rows="5">${esc(r.appeal)}</textarea></div>
+ <div class="field full"><label>主な通学先</label><textarea id="e_schools" rows="4">${esc((r.schools||[]).join('\n'))}</textarea></div><div class="field full"><label>事業所の説明（アピールポイント）</label><div class="apTools"><button type="button" class="tb" title="太字" onclick="apWrap('**','**','太字にする文字')"><b>B</b></button><button type="button" class="tb" title="見出し（行頭に■）" onclick="apHead()">■ 見出し</button><button type="button" class="tb" title="区切り線" onclick="apLine('---')">― 線</button><button type="button" class="tb" title="リンク" onclick="apLink()">🔗 リンク</button><button type="button" class="tb" title="YouTube動画" onclick="apYt()">▶ 動画</button><button type="button" class="tb" title="絵文字" onclick="apEmojiToggle()">😀</button><div id="apEmoji" class="emojiPanel">${EMOJIS.map(e=>`<button type="button" onclick="apInsert('${e}');apEmojiToggle()">${e}</button>`).join('')}</div></div><textarea id="e_appeal" rows="9">${esc(r.appeal)}</textarea><div class="apHelp">文字を選んでボタンを押すと、記号が入ります。<b>**太字**</b>／行頭の<b>■</b>は見出し／<b>---</b>だけの行は線／URLだけの行（YouTube）は動画になります。</div><label style="display:flex;gap:8px;align-items:flex-start;font-weight:700;font-size:13px;cursor:pointer"><input type="checkbox" id="e_appealEd" ${r.appealEdited?'checked':''} style="width:auto;margin-top:3px"><span>この事業所の説明は管理画面で管理する<br><span class="muted">（チェック中は、Excelの取り込みで説明を比較・上書きしません。文章を直すと自動でチェックされます）</span></span></label><div class="apPrevLabel">プレビュー（公開ページの見え方）</div><div class="appeal"><strong>事業所の説明（アピールポイント）</strong><div class="apBody" id="apPrev"></div></div></div>
  <div class="field full"><label>写真①</label><input id="e_photo1" value="${esc(r.photo1)}" placeholder="Google Driveの共有リンクなど"><div class="photoPreview"><img id="p_photo1" src="${esc(photoPreview(r.photo1))}" onerror="this.style.display='none'" ${r.photo1?'':'style="display:none"'}><span id="pt_photo1">${r.photo1?'':'写真①は未登録です'}</span></div></div>
  <div class="field full"><label>写真②</label><input id="e_photo2" value="${esc(r.photo2)}" placeholder="Google Driveの共有リンクなど"><div class="photoPreview"><img id="p_photo2" src="${esc(photoPreview(r.photo2))}" onerror="this.style.display='none'" ${r.photo2?'':'style="display:none"'}><span id="pt_photo2">${r.photo2?'':'写真②は未登録です'}</span></div></div>
  <div class="field full"><label>写真③</label><input id="e_photo3" value="${esc(r.photo3)}" placeholder="Google Driveの共有リンクなど"><div class="photoPreview"><img id="p_photo3" src="${esc(photoPreview(r.photo3))}" onerror="this.style.display='none'" ${r.photo3?'':'style="display:none"'}><span id="pt_photo3">${r.photo3?'':'写真③は未登録です'}</span></div></div>
  <div class="field"><label>公開</label><select id="e_pub"><option>非公開</option><option ${r.published==='公開'?'selected':''}>公開</option></select></div></div>
  <div class="actions"><button class="btn" onclick="$('edit').style.display='none'">閉じる</button><button class="btn green" onclick="save('${esc(r.id)}')">Firestoreに保存</button></div>`;
+ $('e_appeal').addEventListener('input',apTouched);apPrev();
  ['1','2','3'].forEach(n=>{const el=$('e_photo'+n); if(el) el.addEventListener('input',()=>updatePhotoPreview(n));});
  $('edit').scrollIntoView({behavior:'smooth',block:'start'});
 }
 async function save(id){
  const r=rows.find(x=>x.id===id);if(!r)return;
- Object.assign(r,{name:$('e_name').value.trim(),kana:$('e_kana').value.trim(),types:[...document.querySelectorAll('#e_types input:checked')].map(i=>i.value),ward:$('e_ward').value.trim(),address:$('e_address').value.trim(),phone:$('e_phone').value.trim(),hp:$('e_hp').value.trim(),weekday:$('e_weekday').value.trim(),holiday:$('e_holiday').value.trim(),openDays:$('e_open').value.trim(),closedDays:$('e_closed').value.trim(),transport:$('e_transport').value.trim(),food:$('e_food').value.trim(),schools:split($('e_schools').value),appeal:$('e_appeal').value.trim(),photo1:$('e_photo1').value.trim(),photo2:$('e_photo2').value.trim(),photo3:$('e_photo3').value.trim(),published:$('e_pub').value});
+ Object.assign(r,{name:$('e_name').value.trim(),kana:$('e_kana').value.trim(),types:[...document.querySelectorAll('#e_types input:checked')].map(i=>i.value),ward:$('e_ward').value.trim(),address:$('e_address').value.trim(),phone:$('e_phone').value.trim(),hp:$('e_hp').value.trim(),weekday:$('e_weekday').value.trim(),holiday:$('e_holiday').value.trim(),openDays:$('e_open').value.trim(),closedDays:$('e_closed').value.trim(),transport:$('e_transport').value.trim(),food:$('e_food').value.trim(),schools:split($('e_schools').value),appeal:$('e_appeal').value.trim(),appealEdited:$('e_appealEd').checked,photo1:$('e_photo1').value.trim(),photo2:$('e_photo2').value.trim(),photo3:$('e_photo3').value.trim(),published:$('e_pub').value});
  if(!auth.currentUser){alert('先に管理者ログインをしてください。');return}
  try{await db.collection('providers').doc(r.id).set(r);$('edit').style.display='none';render();alert('Firestoreに保存しました。')}catch(e){alert('保存に失敗しました：'+e.message)}
 }
