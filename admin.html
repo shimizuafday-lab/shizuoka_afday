@@ -34,7 +34,7 @@ input[type=file]::file-selector-button{border:0;border-radius:9px;background:var
 .ptimes{font-size:12.5px;color:#4d5f6c;line-height:1.7}
 .tags{display:flex;gap:5px;flex-wrap:wrap}
 .tag{padding:4px 9px;border-radius:999px;background:#eaf5ff;color:var(--c1);font-size:11.5px;font-weight:800}
-.pfoot{padding:0 14px 14px}.pfoot .btn{width:100%}
+.pfoot{padding:0 14px 14px;display:flex;gap:8px}.pfoot .btn{flex:1}.btn.danger{background:#fff0f0;color:#b42318;border:1px solid #f2c7c7}.planNote{background:#fff8e9;border:1px solid #f4dfb5;border-radius:12px;padding:10px 12px;margin-top:10px}.provider.duplicate{border-color:#e5b45d;background:#fffaf0}
 .provider{border:1px solid #dfe9ef;border-radius:14px;padding:12px 14px;margin-top:10px}
 .provider label{display:flex;gap:8px;align-items:center;flex-wrap:wrap;cursor:pointer}
 .status{display:inline-block;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:800;background:#fff3cd;color:#8a6500}
@@ -73,7 +73,7 @@ input[type=file]::file-selector-button{border:0;border-radius:9px;background:var
 .emojiPanel button:hover{background:#eef6fa}
 .apHelp{font-size:12px;color:var(--mute);line-height:1.6;margin:6px 0}
 .apPrevLabel{font-size:12px;font-weight:800;color:var(--mute);margin:10px 0 4px}
-</style></head><body><header><div class="hbar"><div class="brand"><b>静岡市 放課後等デイサービスガイド</b><small>管理画面</small></div><button class="hbtn needauth" onclick="auth.signOut()">ログアウト</button></div></header><main class="wrap"><div class="panel needauth"><h2 style="margin-top:0">Excelを取り込む</h2><p class="muted">GoogleスプレッドシートからダウンロードしたExcelを、そのまま選択してください。CSVへの変換は不要です。<br>ログイン後に取り込むと、登録済みの事業所との<b>差分（新規・変更）</b>を確認してから一括登録できます。</p><input id="file" type="file" accept=".xlsx,.xls" onchange="importExcel(event)"><p id="msg" class="muted"></p></div><div id="stats" class="stats needauth"></div><div class="panel needauth"><div class="toolbar"><input id="q" placeholder="事業所名・住所・学校名で検索"><select id="pub"><option value="">公開状態：すべて</option><option>公開</option><option>非公開</option></select><button class="btn green" onclick="bulkPublish('公開')">表示中を一括公開</button><button class="btn" style="background:#e8eef3" onclick="bulkPublish('非公開')">表示中を一括非公開</button></div><div id="list"></div></div><div id="edit" class="panel needauth" style="display:none"></div></main>
+</style></head><body><header><div class="hbar"><div class="brand"><b>静岡市 放課後等デイサービスガイド</b><small>管理画面</small></div><button class="hbtn needauth" onclick="auth.signOut()">ログアウト</button></div></header><main class="wrap"><div class="panel needauth"><h2 style="margin-top:0">Excelを取り込む</h2><p class="muted">GoogleスプレッドシートからダウンロードしたExcelを、そのまま選択してください。CSVへの変換は不要です。<br>ログイン後に取り込むと、登録済みの事業所との<b>差分（新規・変更）</b>を確認してから一括登録できます。</p><input id="file" type="file" accept=".xlsx,.xls" onchange="importExcel(event)"><p id="msg" class="muted"></p></div><div id="stats" class="stats needauth"></div><div class="panel needauth"><div class="toolbar"><input id="q" placeholder="事業所名・住所・電話番号・学校名で検索"><select id="pub"><option value="">公開状態：すべて</option><option>公開</option><option>非公開</option></select><button class="btn green" onclick="bulkPublish('公開')">表示中を一括公開</button><button class="btn" style="background:#e8eef3" onclick="bulkPublish('非公開')">表示中を一括非公開</button></div><div id="list"></div></div><div id="edit" class="panel needauth" style="display:none"></div></main>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -144,7 +144,11 @@ let plan=[];
 function buildPlan(imp){
  const byId=new Map(rows.map(r=>[r.id,r])),byName=new Map(rows.map(r=>[nkey(r.name),r]));
  let max=Math.max(0,...rows.map(r=>parseInt(String(r.id).replace(/\D/g,''))||0));
+ const seenImport=new Map();
  plan=imp.map(n=>{
+  const signature=nkey(n.name)+'|'+nkey(n.address);
+  if(seenImport.has(signature))return {type:'dup',id:'',data:n,duplicateOf:seenImport.get(signature)};
+  seenImport.set(signature,n.name);
   const old=(n._hasId&&byId.get(n.id))||byName.get(nkey(n.name));
   if(!old){const id=n._hasId?n.id:'SVD-'+String(++max).padStart(3,'0');return {type:'new',id,data:{...n,id}}}
   const skipA=!!old.appealEdited&&val(n,'appeal')!==val(old,'appeal');
@@ -155,10 +159,10 @@ function buildPlan(imp){
 }
 function renderPlan(){
  let p=$('plan');if(!p){p=document.createElement('div');p.id='plan';p.className='panel';$('list').parentNode.before(p)}
- const n=plan.filter(x=>x.type==='new').length,c=plan.filter(x=>x.type==='chg').length,s=plan.length-n-c,sk=plan.filter(x=>x.skipA).length;
- p.innerHTML=`<h2 style="margin-top:0">取り込みの差分</h2><p class="muted">新規 ${n}件 ／ 変更あり ${c}件 ／ 変更なし ${s}件${sk?`<br>※説明を管理画面で編集済みの事業所（${sk}件）は、説明を比較していません。`:''}<br>新規は初期状態で選択済み、変更ありは内容を確認して選択してください（変更は差分の項目だけ更新され、公開状態は変わりません）。</p>`
- +plan.map((x,i)=>x.type==='same'?'':`<div class="provider"><label><input type="checkbox" class="pchk" data-i="${i}" ${x.type==='new'?'checked':''}> <span class="status ${x.type==='new'?'open':''}">${x.type==='new'?'新規':'変更'}</span> <b>${esc(x.data.name)}</b> <span class="muted">${esc(x.id)}</span></label>${(x.diffs||[]).map(d=>`<div class="muted" style="margin-top:4px">${esc(LABEL[d.k])}：${esc(d.from||'(空)')} → <b>${esc(d.to||'(空)')}</b></div>`).join('')}</div>`).join('')
- +(n+c?'':'<p class="muted">登録が必要な差分はありません。</p>')
+ const n=plan.filter(x=>x.type==='new').length,c=plan.filter(x=>x.type==='chg').length,s=plan.filter(x=>x.type==='same').length,du=plan.filter(x=>x.type==='dup').length,sk=plan.filter(x=>x.skipA).length;
+ p.innerHTML=`<h2 style="margin-top:0">取り込みの差分</h2><p class="muted">新規 ${n}件 ／ 変更あり ${c}件 ／ 変更なし ${s}件 ／ Excel内重複の可能性 ${du}件${sk?`<br>※説明を管理画面で編集済みの事業所（${sk}件）は、説明を比較していません。`:''}<br>新規は初期状態で選択済み、変更ありは内容を確認して選択してください（変更は差分の項目だけ更新され、公開状態は変わりません）。</p>`
+ +plan.map((x,i)=>x.type==='same'?'':x.type==='dup'?`<div class="provider duplicate"><span class="status">重複候補・登録対象外</span> <b>${esc(x.data.name)}</b><div class="muted">Excel内で同じ事業所名・住所の行が重複しています。先にExcelを確認してください。</div></div>`:`<div class="provider"><label><input type="checkbox" class="pchk" data-i="${i}" ${x.type==='new'?'checked':''}> <span class="status ${x.type==='new'?'open':''}">${x.type==='new'?'新規':'変更'}</span> <b>${esc(x.data.name)}</b> <span class="muted">${esc(x.id)}</span></label>${(x.diffs||[]).map(d=>`<div class="muted" style="margin-top:4px">${esc(LABEL[d.k])}：${esc(d.from||'(空)')} → <b>${esc(d.to||'(空)')}</b></div>`).join('')}</div>`).join('')
+ +(du?`<div class="planNote muted">重複候補は誤登録防止のため自動登録の対象から外しています。Excel側で整理してから再取り込みしてください。</div>`:'')+(n+c?'':'<p class="muted">登録が必要な差分はありません。</p>')
  +`<div class="actions"><button class="btn" onclick="document.querySelectorAll('.pchk').forEach(c=>c.checked=true)">すべて選択</button><button class="btn" onclick="$('plan').remove()">閉じる</button><button class="btn green" onclick="applyPlan()">選択した分を一括登録</button></div>`;
  p.scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -181,7 +185,7 @@ async function applyPlan(){
 /* ===== 一括公開／非公開（表示中の一覧が対象） ===== */
 function getFiltered(){
  const s=$('q').value.trim().toLowerCase(),p=$('pub').value;
- return rows.filter(r=>(!s||[r.name,r.address,r.ward,...(r.schools||[])].join(' ').toLowerCase().includes(s))&&(!p||r.published===p));
+ return rows.filter(r=>(!s||[r.name,r.address,r.ward,r.phone,...(r.schools||[])].join(' ').toLowerCase().includes(s))&&(!p||r.published===p));
 }
 async function bulkPublish(state){
  if(!auth.currentUser){alert('先に管理者ログインをしてください。');return}
@@ -209,7 +213,7 @@ function importExcel(e){
 function render(){
  const a=getFiltered(),pubN=rows.filter(r=>r.published==='公開').length;
  if($('stats'))$('stats').innerHTML=`<div class="stat"><b>${rows.length}</b><span>登録事業所</span></div><div class="stat ok"><b>${pubN}</b><span>公開中</span></div><div class="stat"><b>${rows.length-pubN}</b><span>非公開</span></div><div class="stat"><b>${a.length}</b><span>表示中</span></div>`;
- $('list').innerHTML=a.length?`<div class="pgrid">`+a.map(r=>{const ph=photoPreview(r.photo1||r.photo2||r.photo3);return `<div class="pcard"><div class="pthumb">${ph?`<img src="${esc(ph)}" loading="lazy" alt="" onerror="this.remove()">`:'写真なし'}<span class="status ${r.published==='公開'?'open':''}">${esc(r.published)}</span></div><div class="pbody"><h3>${esc(r.name)}</h3><div class="muted">${esc(r.id)}　${esc(r.ward)}</div><div class="muted">${esc(r.address)}</div><div class="tags">${(r.types||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div><div class="ptimes">平日 ${esc(r.weekday)}<br>休日・長期休暇 ${esc(r.holiday)}<br>営業日 ${esc(r.openDays)}　閉所日 ${esc(r.closedDays)}</div></div><div class="pfoot"><button class="btn" onclick="edit('${esc(r.id)}')">編集</button></div></div>`}).join('')+`</div>`:'<p class="muted" style="margin-top:14px">該当する事業所はありません。</p>';
+ $('list').innerHTML=a.length?`<div class="pgrid">`+a.map(r=>{const ph=photoPreview(r.photo1||r.photo2||r.photo3);return `<div class="pcard"><div class="pthumb">${ph?`<img src="${esc(ph)}" loading="lazy" alt="" onerror="this.remove()">`:'写真なし'}<span class="status ${r.published==='公開'?'open':''}">${esc(r.published)}</span></div><div class="pbody"><h3>${esc(r.name)}</h3><div class="muted">${esc(r.id)}　${esc(r.ward)}</div><div class="muted">${esc(r.address)}</div><div class="tags">${(r.types||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div><div class="ptimes">平日 ${esc(r.weekday)}<br>休日・長期休暇 ${esc(r.holiday)}<br>営業日 ${esc(r.openDays)}　閉所日 ${esc(r.closedDays)}</div></div><div class="pfoot"><button class="btn" onclick="edit('${esc(r.id)}')">編集</button><button class="btn danger" onclick="deleteProvider('${esc(r.id)}')">完全削除</button></div></div>`}).join('')+`</div>`:'<p class="muted" style="margin-top:14px">該当する事業所はありません。</p>';
 }
 function edit(id){
  const r=rows.find(x=>x.id===id);if(!r)return;$('edit').style.display='block';
@@ -233,9 +237,19 @@ function edit(id){
 }
 async function save(id){
  const r=rows.find(x=>x.id===id);if(!r)return;
- Object.assign(r,{name:$('e_name').value.trim(),kana:$('e_kana').value.trim(),types:[...document.querySelectorAll('#e_types input:checked')].map(i=>i.value),ward:$('e_ward').value.trim(),address:$('e_address').value.trim(),phone:$('e_phone').value.trim(),hp:$('e_hp').value.trim(),weekday:$('e_weekday').value.trim(),holiday:$('e_holiday').value.trim(),openDays:$('e_open').value.trim(),closedDays:$('e_closed').value.trim(),transport:$('e_transport').value.trim(),food:$('e_food').value.trim(),schools:split($('e_schools').value),appeal:$('e_appeal').value.trim(),appealEdited:$('e_appealEd').checked,photo1:$('e_photo1').value.trim(),photo2:$('e_photo2').value.trim(),photo3:$('e_photo3').value.trim(),published:$('e_pub').value});
  if(!auth.currentUser){alert('先に管理者ログインをしてください。');return}
- try{await db.collection('providers').doc(r.id).set(r);$('edit').style.display='none';render();alert('Firestoreに保存しました。')}catch(e){alert('保存に失敗しました：'+e.message)}
+ const updated={...r,name:$('e_name').value.trim(),kana:$('e_kana').value.trim(),types:[...document.querySelectorAll('#e_types input:checked')].map(i=>i.value),ward:$('e_ward').value.trim(),address:$('e_address').value.trim(),phone:$('e_phone').value.trim(),hp:$('e_hp').value.trim(),weekday:$('e_weekday').value.trim(),holiday:$('e_holiday').value.trim(),openDays:$('e_open').value.trim(),closedDays:$('e_closed').value.trim(),transport:$('e_transport').value.trim(),food:$('e_food').value.trim(),schools:split($('e_schools').value),appeal:$('e_appeal').value.trim(),appealEdited:$('e_appealEd').checked,photo1:$('e_photo1').value.trim(),photo2:$('e_photo2').value.trim(),photo3:$('e_photo3').value.trim(),published:$('e_pub').value};
+ try{await db.collection('providers').doc(id).set(updated);Object.assign(r,updated);$('edit').style.display='none';render();alert('Firestoreに保存しました。')}catch(e){alert('保存に失敗しました：'+e.message)}
+}
+async function deleteProvider(id){
+ if(!auth.currentUser){alert('先に管理者ログインをしてください。');return}
+ const r=rows.find(x=>x.id===id);if(!r)return;
+ const typed=prompt('Firestoreから完全削除します。元に戻せません。\n事業所名を確認して入力してください：\n'+r.name);
+ if(typed===null)return;
+ if(typed.trim()!==String(r.name||'').trim()){alert('事業所名が一致しないため削除を中止しました。');return}
+ if(!confirm('「'+r.name+'」を完全に削除します。\nこの操作は取り消せません。実行しますか？'))return;
+ try{await db.collection('providers').doc(id).delete();rows=rows.filter(x=>x.id!==id);if($('edit').style.display!=='none')$('edit').style.display='none';render();alert('Firestoreから完全削除しました。')}
+ catch(e){alert('削除に失敗しました：'+e.message)}
 }
 async function loadFirestore(){
  if(!auth.currentUser)return;
